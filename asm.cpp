@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <assert.h>
+#include <sys/stat.h>
+#include <malloc.h>
+#include "include/printf_debug.h"
+#include "include/text.h"
+#include "include/asm_codes.h"
+#include "stack/include/stack.h"
+
+const char* inputfile_name = "txt/for_asm.txt";
+const char* outputfile_name = "txt/for_disasm.txt";
+
+static size_t print_push_bytecode(const char* const * const text, const ssize_t n_string, FILE* outputfile);
+static size_t print_bytecode(const char* const * const text, const ssize_t n_string, FILE* outputfile);
+static void assembler(const char* const *  const text, const ssize_t n_strings, FILE* outputfile);
+
+int main()
+{
+	ssize_t n_strings = 0;
+
+	char** text = init_text(inputfile_name, &n_strings);
+
+
+	FILE* outputfile = open_file(outputfile_name, "w");
+
+	assembler(text, n_strings, outputfile);
+
+	free_text(text);
+}
+
+static size_t print_push_bytecode(const char* const * const text, const ssize_t n_string, FILE* outputfile)																
+{																							
+	size_t printed_numbers = fprintf(outputfile, "%d ", PUSH);    									
+	elem_t push_number = 0; 																
+	int is_scanned = sscanf(text[n_string] + sizeof("push"), " " STACK_ELEM_PRINTF_SPEC " ", &push_number);	
+	
+	if (!is_scanned)
+	{
+		fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);
+	}
+
+	fprintf(outputfile, "" STACK_ELEM_PRINTF_SPEC "", push_number);
+
+	return printed_numbers;							
+}
+
+
+
+static size_t print_bytecode(const char* const * const text, const ssize_t n_string, FILE* outputfile)
+{		
+	size_t printed_numbers = 0;
+
+	if (strncmp(text[n_string], "push", 4) == 0)  printed_numbers = print_push_bytecode(text, n_string, outputfile);								    
+	if (strncmp(text[n_string], "sqrt", 4) == 0)  printed_numbers = fprintf(outputfile, "%d ", SQRT);  	
+	if (strncmp(text[n_string], "pop", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", POP);    
+	if (strncmp(text[n_string], "add", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", ADD);    
+	if (strncmp(text[n_string], "sub", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", SUB);    
+	if (strncmp(text[n_string], "mul", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", MUL);    
+	if (strncmp(text[n_string], "div", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", DIV);    
+	if (strncmp(text[n_string], "sin", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", SIN);    
+	if (strncmp(text[n_string], "cos", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", COS);    
+	if (strncmp(text[n_string], "out", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", OUT);    
+	if (strncmp(text[n_string], "hlt", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", HLT);    
+
+	return printed_numbers;
+}
+
+
+
+static void assembler(const char* const *  const text, const ssize_t n_strings, FILE* outputfile)
+{
+	ssize_t printed_numbers = 0;
+
+	for (ssize_t n_string = 0; n_string < n_strings; n_string++)
+	{
+		printed_numbers = print_bytecode(text, n_string, outputfile);
+
+		if (printed_numbers > 0) 
+		{
+			fputs("\n", outputfile);
+		}
+		else
+		{
+			fprintf(stderr, "string %zu: invalid command\n", n_string + 1);
+		}
+	}
+}
+
+
+
+
+
+
