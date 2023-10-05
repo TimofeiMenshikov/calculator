@@ -87,7 +87,7 @@ void* alloc_canary_data(const ssize_t old_capacity, const ssize_t new_capacity, 
 
 		size_t n_bytes = new_capacity * sizeof(elem_t);
 
-		STDOUT_PRINT(("%zu bytes to calloc\n", n_bytes));
+		STDOUT_PRINT(printf("%zu bytes to calloc\n", n_bytes));
 
 		if (data == NULL) // проверка существует кусок памяти с массивом или нет
 		{

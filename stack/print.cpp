@@ -88,7 +88,7 @@ unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_
 
 	for (ssize_t element_number = 0; element_number < stk_ptr->size; element_number++)
 	{
-		printf("\t\t*[%zd] = %d\n", element_number, stk_ptr->data[element_number]);
+		printf("\t\t*[%zd] = " STACK_ELEM_PRINTF_SPEC "\n", element_number, stk_ptr->data[element_number]);
 	}
 
 	for (ssize_t element_number = stk_ptr->size; element_number < (print_poison_data_count +  stk_ptr->size); element_number++)

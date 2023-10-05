@@ -60,7 +60,9 @@ static size_t print_bytecode(const char* const * const text, const ssize_t n_str
 	if (strncmp(text[n_string], "sin", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", SIN);    
 	if (strncmp(text[n_string], "cos", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", COS);    
 	if (strncmp(text[n_string], "out", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", OUT);    
-	if (strncmp(text[n_string], "hlt", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", HLT);    
+	if (strncmp(text[n_string], "hlt", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", HLT); 
+	if (strncmp(text[n_string], "in", 2) == 0)   printed_numbers = fprintf(outputfile, "%d ", IN); 
+
 
 	return printed_numbers;
 }

@@ -1,8 +1,8 @@
 #ifndef STACK_H
 #define STACK_H
 
-typedef int elem_t;
-#define STACK_ELEM_PRINTF_SPEC "%d"
+typedef double elem_t;
+#define STACK_ELEM_PRINTF_SPEC "%lf"
 #define CANARY_PRINTF_SPEC "%llu"
 #define HASH_PRINTF_SPEC "%lld"
 typedef unsigned long long canary_t;

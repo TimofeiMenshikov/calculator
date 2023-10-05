@@ -76,6 +76,7 @@ static size_t print_command(const char* const * const text, const ssize_t n_stri
 	if (command == COS)		printed_numbers = fprintf(outputfile, "cos");
 	if (command == OUT)		printed_numbers = fprintf(outputfile, "out");
 	if (command == HLT)		printed_numbers = fprintf(outputfile, "hlt");
+	if (command == IN)		printed_numbers = fprintf(outputfile, "in");
 
 	return printed_numbers;
 }

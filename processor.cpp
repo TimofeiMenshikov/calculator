@@ -42,33 +42,6 @@ static unsigned int processor(const char* const *  const text, const ssize_t n_s
 	print_stack(&stk, START_STACK_SIZE); 
 
 
-#define GET_TWO_LAST_NUMBERS_FROM_STACK()        			\
-	return_code |= stack_pop(stk_ptr);			 			\
-	print_stack(stk_ptr, stk_ptr->capacity);												 			\
-	if (return_code != NO_ERROR)				 			\
-	{											 			\
-		PRINT_ERR_POS()							 			\
-												 			\
-		print_stack_error(return_code);          			\
-	}											 			\
-                                                 			\
-	elem_t pop_number_1 = stk_ptr->last_popped_value; 		\
-												 			\
-	return_code |= stack_pop(stk_ptr);			 			\
-	print_stack(stk_ptr, stk_ptr->capacity);											 			\
-	if (return_code != NO_ERROR)				 			\
-	{											 			\
-		PRINT_ERR_POS()							 			\
-												 			\
-		print_stack_error(return_code);			 			\
-	}											 			\
-												 			\
-	elem_t pop_number_2 = stk_ptr->last_popped_value; 		\
-	printf("exit from define GET_TWO_LAST_NUMBERS_FROM_STACK\n")
-
-
-
-
 static unsigned int do_push_command(const char* const * const text, const ssize_t n_string, struct Stack* stk_ptr)
 {																																
 	elem_t push_number = 0;
@@ -97,68 +70,53 @@ static unsigned int do_push_command(const char* const * const text, const ssize_
 }
 
 
-static unsigned int do_sin_command(const ssize_t n_string, struct Stack* stk_ptr)
-{
-	unsigned int return_code = NO_ERROR;
+static unsigned int do_in_command(struct Stack* stk_ptr)
+{																																
+	elem_t push_number = 0;
 
-	return_code |= stack_pop(stk_ptr);
-	print_stack(stk_ptr, stk_ptr->capacity);
-	if (return_code != NO_ERROR)	 		
-	{				 			
-		PRINT_ERR_POS()							 			
-												 			
-		print_stack_error(return_code);          			
-	}	
+	int is_scanned = scanf(STACK_ELEM_PRINTF_SPEC, &push_number);	
+	
+	if (!is_scanned)
+	{
+		fprintf(stderr, "invalid in number\n");
+	}
 
-	elem_t pop_number_1 = stk_ptr->last_popped_value; 
 
-	return_code |= stack_push(stk_ptr, sin(pop_number_1));									 			
+	unsigned int return_code = stack_push(stk_ptr, push_number);
 
-	return return_code;
+	if (return_code != NO_ERROR)
+	{
+		PRINT_ERR_POS();
+
+		print_stack_error(return_code);
+	}
+
+	return return_code;							
 }
 
 
-static unsigned int do_cos_command(const ssize_t n_string, struct Stack* stk_ptr)
-{
-	unsigned int return_code = NO_ERROR;
-
-	return_code |= stack_pop(stk_ptr);
-	print_stack(stk_ptr, stk_ptr->capacity);
-	if (return_code != NO_ERROR)	 		
-	{				 			
-		PRINT_ERR_POS()							 			
-												 			
-		print_stack_error(return_code);          			
-	}	
-
-	elem_t pop_number_1 = stk_ptr->last_popped_value; 
-
-	return_code |= stack_push(stk_ptr, sin(pop_number_1));
-}
-
-
-elem_t do_add_command(elem_t a, elem_t b)
+static elem_t do_add_command(elem_t a, elem_t b)
 {
 	return a + b;
 }
 
-elem_t do_sub_command(elem_t a, elem_t b)
+static elem_t do_sub_command(elem_t a, elem_t b)
 {
 	return a - b;
 }
 
-elem_t do_mul_command(elem_t a, elem_t b)
+static elem_t do_mul_command(elem_t a, elem_t b)
 {
 	return a * b;
 }
 
-elem_t do_div_command(elem_t a, elem_t b)
+static elem_t do_div_command(elem_t a, elem_t b)
 {
 	return a / b;
 }
 
 
-static unsigned int do_bin_command(const ssize_t n_string, struct Stack* stk_ptr, elem_t  (*command_name)(elem_t a, elem_t b))
+static unsigned int do_bin_command(struct Stack* stk_ptr, elem_t  (*command_name)(elem_t a, elem_t b))
 {
 	unsigned int return_code = NO_ERROR;
 
@@ -186,11 +144,67 @@ static unsigned int do_bin_command(const ssize_t n_string, struct Stack* stk_ptr
 
 	return_code |= stack_push(stk_ptr, command_name(pop_number_2, pop_number_1));
 
+	if (return_code != NO_ERROR)				 			
+	{											 			
+		PRINT_ERR_POS()							 			
+												 			
+		print_stack_error(return_code);			 			
+	}		
+
 	return return_code; 	
 }
 
 
+static elem_t do_cos_command(elem_t a)
+{
+	return cos(a);
+}
 
+static elem_t do_sin_command(elem_t a)
+{
+	return sin(a);
+}
+
+
+static elem_t do_sqrt_command(elem_t a)
+{
+	return sqrt(a);
+}
+
+
+static unsigned int do_unary_command(struct Stack* stk_ptr, elem_t (*command_name)(elem_t a))
+{
+	unsigned int return_code = NO_ERROR;
+
+	return_code |= stack_pop(stk_ptr);			 			
+	print_stack(stk_ptr, stk_ptr->capacity);
+	if (return_code != NO_ERROR)				 			
+	{											 			
+		PRINT_ERR_POS()							 			
+												 			
+		print_stack_error(return_code);          			
+	}											 			
+                                                 			
+	elem_t pop_number_1 = stk_ptr->last_popped_value; 
+
+	if (return_code != NO_ERROR)				 			
+	{											 			
+		PRINT_ERR_POS()							 			
+												 			
+		print_stack_error(return_code);			 			
+	}
+
+	return_code |= stack_push(stk_ptr, command_name(pop_number_1));
+
+	if (return_code != NO_ERROR)				 			
+	{											 			
+		PRINT_ERR_POS()							 			
+												 			
+		print_stack_error(return_code);			 			
+	}				
+
+	return return_code;
+}
 
 
 static unsigned int do_command(const char* const * const text, const ssize_t n_string, struct Stack* stk_ptr)
@@ -210,13 +224,14 @@ static unsigned int do_command(const char* const * const text, const ssize_t n_s
  
 	if (command == POP)		return_code |= stack_pop(stk_ptr);
 
-	//if (command == SQRT) 	return_code |= do_sqrt_command(n_string, stk_ptr);
-	if (command == ADD)		return_code |= do_bin_command(n_string, stk_ptr, do_add_command);
-	if (command == SUB)		return_code |= do_bin_command(n_string, stk_ptr, do_sub_command);
-	if (command == MUL)		return_code |= do_bin_command(n_string, stk_ptr, do_mul_command);
-	if (command == DIV)		return_code |= do_bin_command(n_string, stk_ptr, do_div_command);
-	if (command == SIN)		return_code |= do_sin_command(n_string, stk_ptr);
-	if (command == COS)		return_code |= do_cos_command(n_string, stk_ptr);
+	if (command == SQRT) 	return_code |= do_unary_command(stk_ptr, do_sqrt_command);
+	if (command == ADD)		return_code |= do_bin_command(stk_ptr, do_add_command);
+	if (command == SUB)		return_code |= do_bin_command(stk_ptr, do_sub_command);
+	if (command == MUL)		return_code |= do_bin_command(stk_ptr, do_mul_command);
+	if (command == DIV)		return_code |= do_bin_command(stk_ptr, do_div_command);
+	if (command == SIN)		return_code |= do_unary_command(stk_ptr, do_cos_command);
+	if (command == COS)		return_code |= do_unary_command(stk_ptr, do_sin_command);
+	if (command == IN)      return_code |= do_in_command(stk_ptr);
 	if (command == OUT)
 	{
 		return_code |= OUT_EXIT_CODE;
