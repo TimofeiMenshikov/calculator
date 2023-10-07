@@ -11,8 +11,8 @@
 
 
 static void disassembler(const char* const *  const text, const ssize_t n_strings, FILE* outputfile);
-static size_t print_push_command(const char* const * const text, const ssize_t n_string, FILE* outputfile);
-static size_t print_command(const char* const * const text, const ssize_t n_string, FILE* outputfile);
+static size_t print_push_command(const char* const string, const ssize_t n_string, FILE* outputfile);
+static size_t print_command(const char* const string, ssize_t n_string, FILE* outputfile);
 
 const char* inputfile_name = "txt/for_disasm.txt";
 const char* outputfile_name = "txt/output.txt";
@@ -32,14 +32,14 @@ int main()
 }
 
 
-static size_t print_push_command(const char* const * const text, const ssize_t n_string, FILE* outputfile)																\
+static size_t print_push_command(const char* const string, const ssize_t n_string, FILE* outputfile)																
 {																							
 	size_t printed_numbers = fprintf(outputfile, "push ");    									
 	elem_t push_number = 0;
 
 	command_t command = 0;
 
-	int is_scanned = sscanf(text[n_string], " " COMMAND_PRINTF_SPEC " " STACK_ELEM_PRINTF_SPEC " ", &command , &push_number);	
+	int is_scanned = sscanf(string, " " COMMAND_PRINTF_SPEC " " STACK_ELEM_PRINTF_SPEC " ", &command , &push_number);	
 	
 	if (!is_scanned)
 	{
@@ -52,20 +52,20 @@ static size_t print_push_command(const char* const * const text, const ssize_t n
 }
 
 
-static size_t print_command(const char* const * const text, const ssize_t n_string, FILE* outputfile)                                                              					\
+static size_t print_command(const char* const string, ssize_t n_string, FILE* outputfile)                                                              					
 {		
 	size_t printed_numbers = 0;
 
 	command_t command = 0;
 
-	int is_scanned = sscanf(text[n_string], "" COMMAND_PRINTF_SPEC "", &command);
+	int is_scanned = sscanf(string, "" COMMAND_PRINTF_SPEC "", &command);
 
 	if (!is_scanned)
 	{
 		fprintf(stderr, "string %zu: invalid command number\n", n_string);
 	}
 
-	if (command == PUSH)	printed_numbers = print_push_command(text, n_string, outputfile);
+	if (command == PUSH)	printed_numbers = print_push_command(string, n_string, outputfile);
 	if (command == SQRT) 	printed_numbers = fprintf(outputfile, "sqrt");
 	if (command == POP)		printed_numbers = fprintf(outputfile, "pop");
 	if (command == ADD)		printed_numbers = fprintf(outputfile, "add");
@@ -88,7 +88,7 @@ static void disassembler(const char* const *  const text, const ssize_t n_string
 
 	for (ssize_t n_string = 0; n_string < n_strings; n_string++)
 	{
-		printed_numbers = print_command(text, n_string, outputfile);
+		printed_numbers = print_command(text[n_string], n_string, outputfile);
 
 		if (printed_numbers > 0) 
 		{

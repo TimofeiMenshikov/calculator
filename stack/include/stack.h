@@ -60,6 +60,11 @@ enum error_code
 	DATA_HASH_IS_WRONG 				= 1 << 12
 
 	#endif /* HASH_PROTECTION */
+	,
+	SPU_CODE_IS_NULL						= 1 << 15,
+	INVALID_SPU_CODE_CAPACITY       		= 1 << 16,
+	INVALID_SPU_IP                  		= 1 << 17,
+	SPU_IP_IS_NOT_SMALLER_THAN_CODE      	= 1 << 18
 };
 
 struct Stack_info

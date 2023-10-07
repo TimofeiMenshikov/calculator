@@ -4,7 +4,7 @@ OBJDIR = object_files
 STKDIR = stack
 ASM_OBJECTS = $(OBJDIR)/asm.o $(OBJDIR)/text.o  
 DISASM_OBJECTS = $(OBJDIR)/disasm.o $(OBJDIR)/text.o
-PROCESSOR_OBJECTS = $(OBJDIR)/processor.o $(OBJDIR)/stack.o $(OBJDIR)/print.o $(OBJDIR)/hash.o $(OBJDIR)/canary.o $(OBJDIR)/text.o
+PROCESSOR_OBJECTS = $(OBJDIR)/processor.o $(OBJDIR)/run_processor.o $(OBJDIR)/stack.o $(OBJDIR)/print.o $(OBJDIR)/hash.o $(OBJDIR)/canary.o $(OBJDIR)/text.o
 
 CANARY_PROTECTION = False
 HASH_PROTECTION   = False
