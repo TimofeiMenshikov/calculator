@@ -3,11 +3,12 @@
 #include "stack/include/stack.h"
 #include "stack/include/print.h"
 #include "include/processor.h"
+#include "include/text.h"
 
 const ssize_t SPU_STACK_START_SIZE = 5;
 const ssize_t MAX_CODE_SIZE = 10;
 
-unsigned int processor_init(struct Processor* spu_ptr)
+unsigned int processor_init(struct Processor* spu_ptr, const char* const filename)
 {
 	unsigned int return_code = NO_ERROR;
 
@@ -29,18 +30,15 @@ unsigned int processor_init(struct Processor* spu_ptr)
 
 	spu_ptr->stk = stk;
 
-	spu_ptr->rax = POISON_VALUE;
-	spu_ptr->rbx = POISON_VALUE;
-	spu_ptr->rcx = POISON_VALUE;
-	spu_ptr->rdx = POISON_VALUE;
+	for (ssize_t register_number = 0; register_number < REGISTER_COUNT; register_number++)
+	{
+		(spu_ptr->r_x)[register_number] = POISON_VALUE;
+	}
 
-	spu_ptr->code = (elem_t*) calloc(MAX_CODE_SIZE, sizeof(elem_t));
 
-	spu_ptr->code_capacity = MAX_CODE_SIZE;
+	return_code |= init_spu_code(spu_ptr, filename);
+
 	spu_ptr->ip = 0;
-
-	ssize_t ip = 0;
-
 
 	return return_code;
 }
@@ -52,22 +50,105 @@ unsigned int processor_dtor(struct Processor* spu_ptr)
 
 	return_code |= stack_dtor(&(spu_ptr->stk));
 
-	spu_ptr->rax = POISON_VALUE;
-	spu_ptr->rbx = POISON_VALUE;
-	spu_ptr->rcx = POISON_VALUE;
-	spu_ptr->rdx = POISON_VALUE;
+	for (ssize_t register_number = 0; register_number < REGISTER_COUNT; register_number++)
+	{
+		(spu_ptr->r_x)[register_number] = POISON_VALUE;
+	}
 
 	free(spu_ptr->code);
 
 	spu_ptr->code = NULL;
 
-	ssize_t ip = POISON_VALUE;
+	spu_ptr->ip = POISON_VALUE;
 
 	return return_code;	
 }
 
 
-unsigned int processor_verificator(struct Processor* spu_ptr)
+unsigned int init_spu_code(struct Processor* spu_ptr, const char* const filename)
+{
+	size_t buffer_size = 0;
+
+	char* buffer = init_buffer_from_file(filename, &buffer_size);
+	
+	/*for (ssize_t char_number = 0; char_number < buffer_size; char_number++)
+	{
+		printf("%c(%d)\n", buffer[char_number], buffer[char_number]);
+	}*/
+
+	char* buffer_copy = buffer;
+
+	//printf("%s\n", buffer);
+
+	elem_t elem_t_number = 0;
+
+	ssize_t scanned_number = 0;
+
+	while (true)
+	{
+		ssize_t is_scanned = sscanf(buffer, STACK_ELEM_PRINTF_SPEC, &elem_t_number);
+
+		//printf(" scanned: "STACK_ELEM_PRINTF_SPEC"\n", elem_t_number);
+
+		if (is_scanned <= 0)
+		{
+			break;
+		}
+
+		scanned_number++;
+
+		while ((buffer[0] != ' ') && (buffer[0] != '\n') && (buffer[0] != '\0'))
+		{
+			buffer++;
+		}
+
+		while ((buffer[0] == ' ') || (buffer[0] == '\n') || (buffer[0]) == '\0')
+		{
+			buffer++;
+		}
+
+		
+		//printf("scanned_number: %zd\n", scanned_number);
+
+		//printf("----------------------------\n");
+
+		//printf("%s\n", buffer);
+
+		//printf("-----------------------------\n");
+
+	}
+
+	//printf("scanned_number: %zd\n", scanned_number);	
+
+
+	spu_ptr->code = (elem_t*) calloc(scanned_number, sizeof(elem_t));
+
+	spu_ptr->code_capacity = scanned_number;
+
+	//printf("spu_ptr->code_capacity %zd\n", spu_ptr->code_capacity);
+
+	for (ssize_t code_number = 0; code_number < scanned_number; code_number++)
+	{
+		ssize_t is_scanned = sscanf(buffer_copy, STACK_ELEM_PRINTF_SPEC, &((spu_ptr->code)[code_number]));
+
+		while ((buffer_copy[0] != ' ') && (buffer_copy[0] != '\n') && (buffer_copy[0] != '\0'))
+		{
+			buffer_copy++;
+		}
+
+		while ((buffer_copy[0] == ' ') || (buffer_copy[0] == '\n') || (buffer_copy[0]) == '\0')
+		{
+			buffer_copy++;
+		}
+	}
+
+	return NO_ERROR;
+	
+
+}
+
+
+unsigned int processor_verificator(const struct Processor* const spu_ptr)
 {
 	unsigned int return_code = 0;
 
@@ -85,21 +166,28 @@ unsigned int processor_verificator(struct Processor* spu_ptr)
 }
 
 
-unsigned int processor_print(struct Processor* spu_ptr, ssize_t print_poison_stack_data_count)
+unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_t print_poison_stack_data_count, const ssize_t print_code_wide)
 {
 	printf("processor spu [%p]\n", spu_ptr);
 
 	printf("{\n");
-	printf("\trax = " STACK_ELEM_PRINTF_SPEC "\n", spu_ptr->rax);
-	printf("\trbx = " STACK_ELEM_PRINTF_SPEC "\n", spu_ptr->rbx);
-	printf("\trcx = " STACK_ELEM_PRINTF_SPEC "\n", spu_ptr->rcx);
-	printf("\trdx = " STACK_ELEM_PRINTF_SPEC "\n", spu_ptr->rdx);
+	printf("\trax = " STACK_ELEM_PRINTF_SPEC "\n", (spu_ptr->r_x)[RAX]);
+	printf("\trbx = " STACK_ELEM_PRINTF_SPEC "\n", (spu_ptr->r_x)[RBX]);
+	printf("\trcx = " STACK_ELEM_PRINTF_SPEC "\n", (spu_ptr->r_x)[RCX]);
+	printf("\trdx = " STACK_ELEM_PRINTF_SPEC "\n", (spu_ptr->r_x)[RDX]);
 	printf("\tcode capacity = %zd\n", spu_ptr->code_capacity);
 	printf("\tcode ip       = %zd\n", spu_ptr->ip);
 	printf("\tnumber");
 
+	ssize_t left_code_number  = spu_ptr->ip - print_code_wide + 1;
+	ssize_t right_code_number = spu_ptr->ip + print_code_wide;
 
-	for (ssize_t code_number = 0; code_number < spu_ptr->code_capacity; code_number++)
+
+	if (left_code_number < 0) left_code_number = 0;
+	if (right_code_number > spu_ptr->code_capacity) right_code_number = spu_ptr->code_capacity;
+
+
+	for (ssize_t code_number = left_code_number; code_number < right_code_number; code_number++)
 	{
 		printf("%*zd", SPU_CODE_PRINTF_WIDE, code_number);
 		putchar(' ');
@@ -109,16 +197,16 @@ unsigned int processor_print(struct Processor* spu_ptr, ssize_t print_poison_sta
 	printf("\tcode  ");
 	
 
-	for (ssize_t code_number = 0; code_number < spu_ptr->code_capacity; code_number++)
+	for (ssize_t code_number = left_code_number; code_number < right_code_number; code_number++)
 	{
-		printf(PROCESSOR_CODE_PRINTF_SPEC, SPU_CODE_PRINTF_WIDE, code_number);
+		printf(PROCESSOR_CODE_PRINTF_SPEC, (spu_ptr->code)[code_number]);
 		putchar(' ');
 	}
 
 	putchar('\n');
 
 	printf("\t      ");
-	for (ssize_t code_number = 0; code_number < spu_ptr->code_capacity; code_number++)
+	for (ssize_t code_number = left_code_number; code_number < right_code_number; code_number++)
 	{
 		for (ssize_t space_number = 0; space_number < SPU_CODE_PRINTF_WIDE - 1; space_number++)
 		{

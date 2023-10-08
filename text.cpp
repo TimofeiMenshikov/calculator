@@ -30,7 +30,7 @@ static size_t find_n_strings(const char* const buffer, const size_t buffer_size)
 }
 
 
-static char* init_buffer_from_file(const char* const filename, size_t* buffer_size_ptr)
+char* init_buffer_from_file(const char* const filename, size_t* buffer_size_ptr)
 {
 	struct stat buffer_info;
 

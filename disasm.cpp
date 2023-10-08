@@ -8,8 +8,6 @@
 #include "stack/include/stack.h"
 
 
-
-
 static void disassembler(const char* const *  const text, const ssize_t n_strings, FILE* outputfile);
 static size_t print_push_command(const char* const string, const ssize_t n_string, FILE* outputfile);
 static size_t print_command(const char* const string, ssize_t n_string, FILE* outputfile);

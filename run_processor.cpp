@@ -17,8 +17,8 @@ const unsigned int HLT_EXIT_CODE = 1 << 14;
 
 const char* inputfile_name = "txt/for_disasm.txt";
 
-static unsigned int do_push_command(const char* const string, ssize_t n_string, struct Stack* stk_ptr);
-static unsigned int do_command(const char* const string,  ssize_t n_string, struct Stack* stk_ptr);
+static unsigned int do_push_command(struct Processor* spu_ptr);
+static unsigned int do_command(struct Processor* spu_ptr);
 static unsigned int run_processor(struct Processor* spu_ptr, const char* const *  const text, const ssize_t n_strings);
 
 
@@ -43,22 +43,26 @@ static unsigned int run_processor(struct Processor* spu_ptr, const char* const *
 	print_stack(&stk, START_STACK_SIZE); 
 
 
-static unsigned int do_push_command(const char* const string, ssize_t n_string, struct Stack* stk_ptr)
+static unsigned int do_push_command(struct Processor* spu_ptr)
 {																																
 	elem_t push_number = 0;
 
-	command_t command = 0; // фиктивная переменная для sscanf чтобы сканировало push_number, как вторую переменную
+	//command_t command = 0; // фиктивная переменная для sscanf чтобы сканировало push_number, как вторую переменную
 
-	int is_scanned = sscanf(string, " " COMMAND_PRINTF_SPEC " " STACK_ELEM_PRINTF_SPEC " ", &command , &push_number);	
+	//int is_scanned = sscanf(string, " " COMMAND_PRINTF_SPEC " " STACK_ELEM_PRINTF_SPEC " ", &command , &push_number);	
 	
 	//printf("command: " COMMAND_PRINTF_SPEC "\n", command);
 
-	if (!is_scanned)
+	push_number = spu_ptr->code[spu_ptr->ip];
+
+	spu_ptr->ip++;
+
+	/*if (!is_scanned)
 	{
 		fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);
-	}
+	}*/
 
-	unsigned int return_code = stack_push(stk_ptr, push_number);
+	unsigned int return_code = stack_push(&(spu_ptr->stk), push_number);
 
 	if (return_code != NO_ERROR)
 	{
@@ -81,7 +85,6 @@ static unsigned int do_in_command(struct Stack* stk_ptr)
 	{
 		fprintf(stderr, "invalid in number\n");
 	}
-
 
 	unsigned int return_code = stack_push(stk_ptr, push_number);
 
@@ -208,31 +211,33 @@ static unsigned int do_unary_command(struct Stack* stk_ptr, elem_t (*command_nam
 }
 
 
-static unsigned int do_command(const char* const string,  ssize_t n_string, struct Stack* stk_ptr)
+static unsigned int do_command(struct Processor* spu_ptr)
 {		
-	command_t command = 0;
-
-	int is_scanned = sscanf(string, "" COMMAND_PRINTF_SPEC "", &command);
+	//int is_scanned = sscanf(string, "" COMMAND_PRINTF_SPEC "", &command);
 
 	unsigned int return_code = NO_ERROR;
 
-	if (!is_scanned)
+	/*if (!is_scanned)
 	{
 		fprintf(stderr, "string %zu: invalid command number\n", n_string);
-	}
+	}*/
 
-	if (command == PUSH) 	return_code |= do_push_command(string, n_string, stk_ptr);
+	command_t command = spu_ptr->code[spu_ptr->ip];
+
+	spu_ptr->ip++;
+
+	if (command == PUSH) 	return_code |= do_push_command(spu_ptr);
  
-	if (command == POP)		return_code |= stack_pop(stk_ptr);
+	if (command == POP)		return_code |= stack_pop(&(spu_ptr->stk));
 
-	if (command == SQRT) 	return_code |= do_unary_command(stk_ptr, do_sqrt_command);
-	if (command == ADD)		return_code |= do_bin_command(stk_ptr, do_add_command);
-	if (command == SUB)		return_code |= do_bin_command(stk_ptr, do_sub_command);
-	if (command == MUL)		return_code |= do_bin_command(stk_ptr, do_mul_command);
-	if (command == DIV)		return_code |= do_bin_command(stk_ptr, do_div_command);
-	if (command == SIN)		return_code |= do_unary_command(stk_ptr, do_cos_command);
-	if (command == COS)		return_code |= do_unary_command(stk_ptr, do_sin_command);
-	if (command == IN)      return_code |= do_in_command(stk_ptr);
+	if (command == SQRT) 	return_code |= do_unary_command(&(spu_ptr->stk), do_sqrt_command);
+	if (command == ADD)		return_code |= do_bin_command(&(spu_ptr->stk), do_add_command);
+	if (command == SUB)		return_code |= do_bin_command(&(spu_ptr->stk), do_sub_command);
+	if (command == MUL)		return_code |= do_bin_command(&(spu_ptr->stk), do_mul_command);
+	if (command == DIV)		return_code |= do_bin_command(&(spu_ptr->stk), do_div_command);
+	if (command == SIN)		return_code |= do_unary_command(&(spu_ptr->stk), do_cos_command);
+	if (command == COS)		return_code |= do_unary_command(&(spu_ptr->stk), do_sin_command);
+	if (command == IN)      return_code |= do_in_command(&(spu_ptr->stk));
 	if (command == OUT)
 	{
 		return_code |= OUT_EXIT_CODE;
@@ -254,7 +259,7 @@ static unsigned int run_processor(struct Processor* spu_ptr, const char* const *
 
 	for (ssize_t n_string = 0; n_string < n_strings; n_string++)
 	{
-		return_code |= do_command(text[n_string], n_string, &(spu_ptr->stk));
+		return_code |= do_command(spu_ptr);
 
 		/*if ((return_code != NO_ERROR) || (return_code != HLT_EXIT_CODE) || (return_code != OUT_EXIT_CODE) || (return_code != HLT_EXIT_CODE | OUT_EXIT_CODE))
 		{
@@ -266,7 +271,7 @@ static unsigned int run_processor(struct Processor* spu_ptr, const char* const *
 			return NO_ERROR;
 		}*/
 
-		processor_print(spu_ptr, spu_ptr->stk.capacity);
+		processor_print(spu_ptr, spu_ptr->stk.capacity, 1000);
 	}
 
 	return return_code;
@@ -277,7 +282,16 @@ int main()
 {
 	struct Processor spu;
 
-	processor_init(&spu);
+	processor_init(&spu, inputfile_name);
+
+	//init_spu_code(&spu, inputfile_name);
+
+	printf("spu_ptr->code_capacity %zd", spu.code_capacity);
+
+	/*for (ssize_t code_number = 0; code_number < spu.code_capacity; code_number++)
+	{
+		printf("" STACK_ELEM_PRINTF_SPEC "\n", (spu.code)[code_number]);
+	}*/
 
 	ssize_t n_strings = 0;
 
@@ -286,4 +300,6 @@ int main()
 	run_processor(&spu ,text, n_strings);
 
 	free_text(text);
+
+	processor_dtor(&spu);
 }

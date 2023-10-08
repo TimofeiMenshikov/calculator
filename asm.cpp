@@ -90,11 +90,7 @@ static void assembler(const char* const *  const text, const ssize_t n_strings, 
 	}
 }
 
-/*
-static unsigned int init_spu_code(struct Processor* spu_ptr, const char* const * const text, const ssize_t n_strings)
-{
-		
-}*/
+
 
 
 
