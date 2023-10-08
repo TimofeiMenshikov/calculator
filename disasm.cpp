@@ -61,11 +61,33 @@ static size_t print_pop_command(const char* const string, const ssize_t n_string
 	
 	if (!is_scanned)
 	{
-		fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);
+		fprintf(stderr, "string %zu: invalid pop number\n", n_string + 1);
 	}
 
 	putc('r', outputfile);
 	putc('a' + pop_number, outputfile);
+	putc('x', outputfile);
+
+	return printed_numbers;							
+}
+
+
+static size_t print_rpush_command(const char* const string, const ssize_t n_string, FILE* outputfile)																
+{																							
+	size_t printed_numbers = fprintf(outputfile, "rpush ");    									
+	elem_t rpush_number = 0;
+
+	command_t command = 0;
+
+	int is_scanned = sscanf(string, " " COMMAND_PRINTF_SPEC " " STACK_ELEM_PRINTF_SPEC " ", &command , &rpush_number);	
+	
+	if (!is_scanned)
+	{
+		fprintf(stderr, "string %zu: invalid rpush number\n", n_string + 1);
+	}
+
+	putc('r', outputfile);
+	putc('a' + rpush_number, outputfile);
 	putc('x', outputfile);
 
 	return printed_numbers;							
@@ -97,6 +119,7 @@ static size_t print_command(const char* const string, ssize_t n_string, FILE* ou
 	if (command == OUT)		printed_numbers = fprintf(outputfile, "out");
 	if (command == HLT)		printed_numbers = fprintf(outputfile, "hlt");
 	if (command == IN)		printed_numbers = fprintf(outputfile, "in");
+	if (command == RPUSH)   printed_numbers = print_rpush_command(string, n_string, outputfile);
 
 	return printed_numbers;
 }

@@ -1,10 +1,15 @@
-push 100
-push 1
 push 3
-add
-div
-sqrt
-in
-in
-push 78
+pop rcx
+push 100
+rpush rcx
+rpush rcx 
+rpush rcx
+pop rax
 pop rbx
+rpush rax
+rpush rbx
+rpush rax
+rpush rax
+out
+push 3
+hlt

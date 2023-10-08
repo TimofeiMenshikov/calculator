@@ -10,10 +10,10 @@
 
 	enum register_name
 	{
-		RAX = 1,
-		RBX = 2,
-		RCX = 3,
-		RDX = 4
+		RAX = 0,
+		RBX = 1,
+		RCX = 2,
+		RDX = 3
 	};
 
 	struct Processor 

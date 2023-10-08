@@ -1,10 +1,15 @@
-push 100.000000
-push 1.000000
 push 3.000000
-add
-div
-sqrt
-in
-in
-push 78.000000
+pop rcx
+push 100.000000
+rpush rcx
+rpush rcx
+rpush rcx
+pop rax
 pop rbx
+rpush rax
+rpush rbx
+rpush rax
+rpush rax
+out
+push 3.000000
+hlt

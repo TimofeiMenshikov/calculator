@@ -127,8 +127,6 @@ unsigned int stack_pop(struct Stack* const stk_ptr)
 
 	ssize_t stack_decrease_lag = stk_ptr->capacity / (increase_coef * decrease_coef); 
 
-	STDOUT_PRINT(printf("stack size is %zd\n", stk_ptr->size));
-	STDOUT_PRINT(printf("stack capacity is %zd, stack lag is %zd\n", stk_ptr->capacity, stack_decrease_lag));
 
 	if (stack_decrease_lag > stk_ptr->size) 
 	{
@@ -227,8 +225,6 @@ enum error_code stack_dtor(struct Stack* stk_ptr)
 unsigned int stack_verificator(const struct Stack* const stk_ptr) 
 {
 	unsigned int return_code = 0;
-
-	STDOUT_PRINT(printf("start checking stack\n"));
 
 	if (stk_ptr == NULL)
 	{

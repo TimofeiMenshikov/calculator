@@ -24,6 +24,4 @@
 
 	#endif /* HASH_PROTECTION */
 
-
-
 #endif /* HASH_H */ 

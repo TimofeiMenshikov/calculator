@@ -17,6 +17,9 @@ static size_t print_push_bytecode(const char* const string, const ssize_t n_stri
 static size_t print_bytecode(const char* const string, const ssize_t n_string, FILE* outputfile);
 static void assembler(const char* const *  const text, const ssize_t n_strings, FILE* outputfile);
 
+#define IS_COMMAND(command) strncmp(string, command, sizeof(command) - 1) == 0
+
+
 int main()
 {
 	ssize_t n_strings = 0;
@@ -57,9 +60,26 @@ static size_t print_pop_bytecode(const char* const string, const ssize_t n_strin
 	
 	if (!is_scanned)
 	{
-		fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);
+		fprintf(stderr, "string %zu: invalid pop register\n", n_string + 1);
 	}
 
+
+	fprintf(outputfile, "%d", register_name[REGISTER_LETTER_POS] - 'a');
+
+	return printed_numbers;							
+}
+
+
+static size_t print_rpush_bytecode(const char* const string, const ssize_t n_string, FILE* outputfile)																
+{																							
+	size_t printed_numbers = fprintf(outputfile, "%d ", RPUSH);    									
+	char register_name[REGISTER_NAME_SIZE] = {}; 																
+	int is_scanned = sscanf(string + sizeof("rpush"), "%s", register_name);	
+	
+	if (!is_scanned)
+	{
+		fprintf(stderr, "string %zu: invalid rpush register\n", n_string + 1);
+	}
 
 
 	fprintf(outputfile, "%d", register_name[REGISTER_LETTER_POS] - 'a');
@@ -69,24 +89,24 @@ static size_t print_pop_bytecode(const char* const string, const ssize_t n_strin
 
 
 
+
 static size_t print_bytecode(const char* const string, const ssize_t n_string, FILE* outputfile)
 {		
 	size_t printed_numbers = 0;
 
-	if (strncmp(string, "push", 4) == 0)  printed_numbers = print_push_bytecode(string, n_string, outputfile);								    
-	if (strncmp(string, "sqrt", 4) == 0)  printed_numbers = fprintf(outputfile, "%d ", SQRT);  	
-	if (strncmp(string, "pop", 3) == 0)   printed_numbers = print_pop_bytecode(string, n_string, outputfile);    
-	if (strncmp(string, "add", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", ADD);    
-	if (strncmp(string, "sub", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", SUB);    
-	if (strncmp(string, "mul", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", MUL);    
-	if (strncmp(string, "div", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", DIV);    
-	if (strncmp(string, "sin", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", SIN);    
-	if (strncmp(string, "cos", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", COS);    
-	if (strncmp(string, "out", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", OUT);    
-	if (strncmp(string, "hlt", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", HLT); 
-	if (strncmp(string, "in", 2) == 0)   printed_numbers = fprintf(outputfile, "%d ", IN); 
-
-	#warning (strncmp(a , b, sizeof(b) - 1) == 0)
+	if (IS_COMMAND("push"))  printed_numbers = print_push_bytecode(string, n_string, outputfile);								    
+	if (IS_COMMAND("sqrt"))  printed_numbers = fprintf(outputfile, "%d ", SQRT);  	
+	if (IS_COMMAND("pop"))   printed_numbers = print_pop_bytecode(string, n_string, outputfile);    
+	if (IS_COMMAND("add"))   printed_numbers = fprintf(outputfile, "%d ", ADD);    
+	if (IS_COMMAND("sub"))   printed_numbers = fprintf(outputfile, "%d ", SUB);    
+	if (IS_COMMAND("mul"))   printed_numbers = fprintf(outputfile, "%d ", MUL);    
+	if (IS_COMMAND("div"))   printed_numbers = fprintf(outputfile, "%d ", DIV);    
+	if (IS_COMMAND("sin"))   printed_numbers = fprintf(outputfile, "%d ", SIN);    
+	if (IS_COMMAND("cos"))   printed_numbers = fprintf(outputfile, "%d ", COS);    
+	if (IS_COMMAND("out"))   printed_numbers = fprintf(outputfile, "%d ", OUT);    
+	if (IS_COMMAND("hlt"))   printed_numbers = fprintf(outputfile, "%d ", HLT); 
+	if (IS_COMMAND("in"))    printed_numbers = fprintf(outputfile, "%d ", IN); 
+	if (IS_COMMAND("rpush")) printed_numbers = print_rpush_bytecode(string, n_string, outputfile);
 
 	return printed_numbers;
 }

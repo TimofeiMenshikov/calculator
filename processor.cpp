@@ -8,6 +8,8 @@
 const ssize_t SPU_STACK_START_SIZE = 5;
 const ssize_t MAX_CODE_SIZE = 10;
 
+
+
 unsigned int processor_init(struct Processor* spu_ptr, const char* const filename)
 {
 	unsigned int return_code = NO_ERROR;

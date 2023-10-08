@@ -125,9 +125,6 @@ void print_text(const char* const * const text, const ssize_t n_strings, FILE* o
 }
 
 
-
-
-
 void free_text(char** text)
 {
 	free(text[0]);
