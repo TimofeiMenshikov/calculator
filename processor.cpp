@@ -120,7 +120,6 @@ unsigned int init_spu_code(struct Processor* spu_ptr, const char* const filename
 
 	//printf("scanned_number: %zd\n", scanned_number);	
 
-
 	spu_ptr->code = (elem_t*) calloc(scanned_number, sizeof(elem_t));
 
 	spu_ptr->code_capacity = scanned_number;

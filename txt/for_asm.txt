@@ -7,3 +7,4 @@ sqrt
 in
 in
 push 78
+pop rbx

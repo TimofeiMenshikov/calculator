@@ -2,5 +2,4 @@ html
 latex
 *.exe
 *.o
-processor.exe
-processor.exe
+object_files\*

@@ -50,6 +50,28 @@ static size_t print_push_command(const char* const string, const ssize_t n_strin
 }
 
 
+static size_t print_pop_command(const char* const string, const ssize_t n_string, FILE* outputfile)																
+{																							
+	size_t printed_numbers = fprintf(outputfile, "pop ");    									
+	elem_t pop_number = 0;
+
+	command_t command = 0;
+
+	int is_scanned = sscanf(string, " " COMMAND_PRINTF_SPEC " " STACK_ELEM_PRINTF_SPEC " ", &command , &pop_number);	
+	
+	if (!is_scanned)
+	{
+		fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);
+	}
+
+	putc('r', outputfile);
+	putc('a' + pop_number, outputfile);
+	putc('x', outputfile);
+
+	return printed_numbers;							
+}
+
+
 static size_t print_command(const char* const string, ssize_t n_string, FILE* outputfile)                                                              					
 {		
 	size_t printed_numbers = 0;
@@ -65,7 +87,7 @@ static size_t print_command(const char* const string, ssize_t n_string, FILE* ou
 
 	if (command == PUSH)	printed_numbers = print_push_command(string, n_string, outputfile);
 	if (command == SQRT) 	printed_numbers = fprintf(outputfile, "sqrt");
-	if (command == POP)		printed_numbers = fprintf(outputfile, "pop");
+	if (command == POP)		printed_numbers = print_pop_command(string, n_string, outputfile);
 	if (command == ADD)		printed_numbers = fprintf(outputfile, "add");
 	if (command == SUB)		printed_numbers = fprintf(outputfile, "sub");
 	if (command == MUL)		printed_numbers = fprintf(outputfile, "mul");

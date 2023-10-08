@@ -43,6 +43,40 @@ static unsigned int run_processor(struct Processor* spu_ptr, const char* const *
 	print_stack(&stk, START_STACK_SIZE); 
 
 
+static unsigned int do_pop_command(struct Processor* spu_ptr)
+{																																
+	elem_t pop_number = 0;
+
+	//command_t command = 0; // фиктивная переменная для sscanf чтобы сканировало push_number, как вторую переменную
+
+	//int is_scanned = sscanf(string, " " COMMAND_PRINTF_SPEC " " STACK_ELEM_PRINTF_SPEC " ", &command , &push_number);	
+	
+	//printf("command: " COMMAND_PRINTF_SPEC "\n", command);
+
+	pop_number = spu_ptr->code[spu_ptr->ip];
+
+	spu_ptr->ip++;
+
+	/*if (!is_scanned)
+	{
+		fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);
+	}*/
+
+	unsigned int return_code = stack_pop(&(spu_ptr->stk));
+
+	spu_ptr->r_x[(ssize_t) pop_number] =  spu_ptr->stk.last_popped_value;
+
+	if (return_code != NO_ERROR)
+	{
+		PRINT_ERR_POS();
+
+		print_stack_error(return_code);
+	}
+
+	return return_code;							
+}
+
+
 static unsigned int do_push_command(struct Processor* spu_ptr)
 {																																
 	elem_t push_number = 0;
@@ -228,7 +262,7 @@ static unsigned int do_command(struct Processor* spu_ptr)
 
 	if (command == PUSH) 	return_code |= do_push_command(spu_ptr);
  
-	if (command == POP)		return_code |= stack_pop(&(spu_ptr->stk));
+	if (command == POP)		return_code |= do_pop_command(spu_ptr);
 
 	if (command == SQRT) 	return_code |= do_unary_command(&(spu_ptr->stk), do_sqrt_command);
 	if (command == ADD)		return_code |= do_bin_command(&(spu_ptr->stk), do_add_command);
@@ -286,7 +320,7 @@ int main()
 
 	//init_spu_code(&spu, inputfile_name);
 
-	printf("spu_ptr->code_capacity %zd", spu.code_capacity);
+	//printf("spu_ptr->code_capacity %zd", spu.code_capacity);
 
 	/*for (ssize_t code_number = 0; code_number < spu.code_capacity; code_number++)
 	{

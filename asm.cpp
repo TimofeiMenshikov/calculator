@@ -10,6 +10,9 @@
 const char* inputfile_name = "txt/for_asm.txt";
 const char* outputfile_name = "txt/for_disasm.txt";
 
+const ssize_t REGISTER_NAME_SIZE = 3;
+const ssize_t REGISTER_LETTER_POS = 1; // местонахождение буквы, имеющей порядковый смысл напр: rAx, rBx, rCx
+
 static size_t print_push_bytecode(const char* const string, const ssize_t n_string, FILE* outputfile);
 static size_t print_bytecode(const char* const string, const ssize_t n_string, FILE* outputfile);
 static void assembler(const char* const *  const text, const ssize_t n_strings, FILE* outputfile);
@@ -46,6 +49,25 @@ static size_t print_push_bytecode(const char* const string, const ssize_t n_stri
 }
 
 
+static size_t print_pop_bytecode(const char* const string, const ssize_t n_string, FILE* outputfile)																
+{																							
+	size_t printed_numbers = fprintf(outputfile, "%d ", POP);    									
+	char register_name[REGISTER_NAME_SIZE] = {}; 																
+	int is_scanned = sscanf(string + sizeof("pop"), "%s", register_name);	
+	
+	if (!is_scanned)
+	{
+		fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);
+	}
+
+
+
+	fprintf(outputfile, "%d", register_name[REGISTER_LETTER_POS] - 'a');
+
+	return printed_numbers;							
+}
+
+
 
 static size_t print_bytecode(const char* const string, const ssize_t n_string, FILE* outputfile)
 {		
@@ -53,7 +75,7 @@ static size_t print_bytecode(const char* const string, const ssize_t n_string, F
 
 	if (strncmp(string, "push", 4) == 0)  printed_numbers = print_push_bytecode(string, n_string, outputfile);								    
 	if (strncmp(string, "sqrt", 4) == 0)  printed_numbers = fprintf(outputfile, "%d ", SQRT);  	
-	if (strncmp(string, "pop", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", POP);    
+	if (strncmp(string, "pop", 3) == 0)   printed_numbers = print_pop_bytecode(string, n_string, outputfile);    
 	if (strncmp(string, "add", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", ADD);    
 	if (strncmp(string, "sub", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", SUB);    
 	if (strncmp(string, "mul", 3) == 0)   printed_numbers = fprintf(outputfile, "%d ", MUL);    
