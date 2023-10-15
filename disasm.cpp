@@ -32,7 +32,7 @@ int main()
 
 static size_t print_push_command(const char* const string, const ssize_t n_string, FILE* outputfile)																
 {																							
-	size_t printed_numbers = fprintf(outputfile, "push ");    									
+	size_t printed_numbers = fprintf(outputfile, "PUSH ");    									
 	elem_t push_number = 0;
 
 	command_t command = 0;
@@ -52,7 +52,7 @@ static size_t print_push_command(const char* const string, const ssize_t n_strin
 
 static size_t print_pop_command(const char* const string, const ssize_t n_string, FILE* outputfile)																
 {																							
-	size_t printed_numbers = fprintf(outputfile, "pop ");    									
+	size_t printed_numbers = fprintf(outputfile, "POP ");    									
 	elem_t pop_number = 0;
 
 	command_t command = 0;
@@ -64,9 +64,9 @@ static size_t print_pop_command(const char* const string, const ssize_t n_string
 		fprintf(stderr, "string %zu: invalid pop number\n", n_string + 1);
 	}
 
-	putc('r', outputfile);
-	putc('a' + pop_number, outputfile);
-	putc('x', outputfile);
+	putc('R', outputfile);
+	putc('A' + pop_number, outputfile);
+	putc('X', outputfile);
 
 	return printed_numbers;							
 }
@@ -74,7 +74,7 @@ static size_t print_pop_command(const char* const string, const ssize_t n_string
 
 static size_t print_rpush_command(const char* const string, const ssize_t n_string, FILE* outputfile)																
 {																							
-	size_t printed_numbers = fprintf(outputfile, "rpush ");    									
+	size_t printed_numbers = fprintf(outputfile, "RPUSH ");    									
 	elem_t rpush_number = 0;
 
 	command_t command = 0;
@@ -86,9 +86,9 @@ static size_t print_rpush_command(const char* const string, const ssize_t n_stri
 		fprintf(stderr, "string %zu: invalid rpush number\n", n_string + 1);
 	}
 
-	putc('r', outputfile);
-	putc('a' + rpush_number, outputfile);
-	putc('x', outputfile);
+	putc('R', outputfile);
+	putc('A' + rpush_number, outputfile);
+	putc('X', outputfile);
 
 	return printed_numbers;							
 }
@@ -107,7 +107,14 @@ static size_t print_command(const char* const string, ssize_t n_string, FILE* ou
 		fprintf(stderr, "string %zu: invalid command number\n", n_string);
 	}
 
-	if (command == PUSH)	printed_numbers = print_push_command(string, n_string, outputfile);
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	#define DEF_CMD(cmd_name, number, asm_func, disasm_func, spu_func) 	\
+	if (command == cmd_name) disasm_func								\
+
+	#include "include/commands.h"
+
+	
+	/*if (command == PUSH)	printed_numbers = print_push_command(string, n_string, outputfile);
 	if (command == SQRT) 	printed_numbers = fprintf(outputfile, "sqrt");
 	if (command == POP)		printed_numbers = print_pop_command(string, n_string, outputfile);
 	if (command == ADD)		printed_numbers = fprintf(outputfile, "add");
@@ -120,6 +127,11 @@ static size_t print_command(const char* const string, ssize_t n_string, FILE* ou
 	if (command == HLT)		printed_numbers = fprintf(outputfile, "hlt");
 	if (command == IN)		printed_numbers = fprintf(outputfile, "in");
 	if (command == RPUSH)   printed_numbers = print_rpush_command(string, n_string, outputfile);
+	*/
+
+
+	#undef DEF_CMD
+	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	return printed_numbers;
 }
@@ -143,5 +155,3 @@ static void disassembler(const char* const *  const text, const ssize_t n_string
 		}
 	}
 }
-
-

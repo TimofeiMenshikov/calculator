@@ -20,7 +20,7 @@ unsigned int processor_init(struct Processor* spu_ptr, const char* const filenam
 
 	return_code |= stack_init(&stk, SPU_STACK_START_SIZE);
 
-
+	printf("stack init\n");
 
 	if (return_code != NO_ERROR)								    	 
 	{														   		 
@@ -28,7 +28,9 @@ unsigned int processor_init(struct Processor* spu_ptr, const char* const filenam
 		return return_code;									    	 
 	}														  
 															   		  		
-	return_code |= stack_verificator(&stk);         		 
+	return_code |= stack_verificator(&stk);      
+
+	printf("stack stack_verificator\n"); 		 
 
 	spu_ptr->stk = stk;
 
@@ -37,8 +39,11 @@ unsigned int processor_init(struct Processor* spu_ptr, const char* const filenam
 		(spu_ptr->r_x)[register_number] = POISON_VALUE;
 	}
 
+	printf("before init spu code\n");
 
 	return_code |= init_spu_code(spu_ptr, filename);
+
+	printf("init_spu_code\n");
 
 	spu_ptr->ip = 0;
 
@@ -88,7 +93,8 @@ unsigned int init_spu_code(struct Processor* spu_ptr, const char* const filename
 
 	while (true)
 	{
-		ssize_t is_scanned = sscanf(buffer, STACK_ELEM_PRINTF_SPEC, &elem_t_number);
+		#warning %n
+		ssize_t is_scanned = sscanf(buffer, "" STACK_ELEM_PRINTF_SPEC "", &elem_t_number);
 
 		//printf(" scanned: "STACK_ELEM_PRINTF_SPEC"\n", elem_t_number);
 
@@ -109,7 +115,6 @@ unsigned int init_spu_code(struct Processor* spu_ptr, const char* const filename
 			buffer++;
 		}
 
-		
 		//printf("scanned_number: %zd\n", scanned_number);
 
 		//printf("----------------------------\n");
@@ -117,7 +122,6 @@ unsigned int init_spu_code(struct Processor* spu_ptr, const char* const filename
 		//printf("%s\n", buffer);
 
 		//printf("-----------------------------\n");
-
 	}
 
 	//printf("scanned_number: %zd\n", scanned_number);	
@@ -193,7 +197,7 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 		printf("%*zd", SPU_CODE_PRINTF_WIDE, code_number);
 		putchar(' ');
 	}
-
+	#warning print code as fixed width table
 	putchar('\n');
 	printf("\tcode  ");
 	
@@ -226,7 +230,7 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 		}
 
 		putchar(' ');
-	}
+	} 
 
 	putchar('\n');
 

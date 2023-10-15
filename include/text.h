@@ -7,4 +7,8 @@
 	FILE* open_file(const char* const filename, const char* const modificator);
 	void free_text(char** text);
 
+	void from_txt_to_bin(const char* const inputfile_name, const char* const outputfile_name);
+
+	void read_bin_as_chars(const char* const bin_filename);
+
 #endif /* TEXT_H */
