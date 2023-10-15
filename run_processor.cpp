@@ -268,7 +268,7 @@ static unsigned int run_processor(struct Processor* spu_ptr)
 	{
 		return_code |= do_command(spu_ptr);
 
-		processor_print(spu_ptr, spu_ptr->stk.capacity, 2);
+		processor_print(spu_ptr, spu_ptr->stk.capacity, 100000, 7);
 	}
 
 	return return_code;

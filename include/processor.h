@@ -32,7 +32,7 @@
 	unsigned int processor_init(struct Processor* spu_ptr, const char* const filename);
 	unsigned int processor_dtor(struct Processor* spu_ptr);
 	unsigned int processor_verificator(const struct Processor* const spu_ptr);
-	unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_t print_poison_stack_data_count, const ssize_t print_code_wide);
+	unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_t print_poison_stack_data_count, const ssize_t print_code_wide, const ssize_t n_cols);
 	unsigned int init_spu_code(struct Processor* spu_ptr, const char* const filename);
 
 

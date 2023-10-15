@@ -10,6 +10,9 @@ const ssize_t MAX_CODE_SIZE = 10;
 
 const char* bin_filename = "txt/code.bin";
 
+static void print_one_str(const struct Processor* const spu_ptr, const ssize_t print_code_wide, ssize_t* code_number_ptr);
+static void print_ip(const struct Processor* const spu_ptr, const ssize_t n_cols, const ssize_t left_code_number, ssize_t ip_row);
+
 unsigned int processor_init(struct Processor* spu_ptr, const char* const filename)
 {
 	unsigned int return_code = NO_ERROR;
@@ -94,7 +97,7 @@ unsigned int processor_verificator(const struct Processor* const spu_ptr)
 }
 
 
-unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_t print_poison_stack_data_count, const ssize_t print_code_wide)
+unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_t print_poison_stack_data_count, const ssize_t print_code_wide, const ssize_t n_cols)
 {
 	printf("processor spu [%p]\n", spu_ptr);
 
@@ -105,7 +108,6 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 	printf("\trdx = " STACK_ELEM_PRINTF_SPEC "\n", (spu_ptr->r_x)[RDX]);
 	printf("\tcode capacity = %zd\n", spu_ptr->code_capacity);
 	printf("\tcode ip       = %zd\n", spu_ptr->ip);
-	printf("\tnumber");
 
 	ssize_t left_code_number  = spu_ptr->ip - print_code_wide + 1;
 	ssize_t right_code_number = spu_ptr->ip + print_code_wide;
@@ -114,50 +116,38 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 	if (left_code_number < 0) left_code_number = 0;
 	if (right_code_number > spu_ptr->code_capacity) right_code_number = spu_ptr->code_capacity;
 
+	ssize_t code_number = left_code_number;
 
-	for (ssize_t code_number = left_code_number; code_number < right_code_number; code_number++)
+	ssize_t rows = (right_code_number - left_code_number) / n_cols;
+
+	ssize_t ip_row = spu_ptr->ip / n_cols;
+
+	if (ip_row < rows)
 	{
-		printf("%*d", SPU_CODE_PRINTF_WIDE, code_number);
-		putchar(' ');
-	}
-	#warning print code as fixed width table
-	putchar('\n');
-	printf("\tcode  ");
-	
-
-	for (ssize_t code_number = left_code_number; code_number < right_code_number; code_number++)
-	{
-		printf(PROCESSOR_CODE_PRINTF_SPEC, (spu_ptr->code)[code_number]);
-		putchar(' ');
-	}
-
-	putchar('\n');
-
-	printf("\t      ");
-	for (ssize_t code_number = left_code_number; code_number < right_code_number; code_number++)
-	{
-		for (ssize_t space_number = 0; space_number < SPU_CODE_PRINTF_WIDE - 1; space_number++)
+		for (ssize_t row = 0; row <= ip_row; row++)
 		{
-			putchar(' ');
-		}	
+			print_one_str(spu_ptr, n_cols, &code_number);
+		} 
 
-		if (spu_ptr->ip == code_number)
+		print_ip(spu_ptr, n_cols, left_code_number, ip_row);
+
+		for (ssize_t row = ip_row + 1; row < rows; row++)
 		{
-			putchar('^');
-			printf("ip = %zd", spu_ptr->ip);
-			break;
+			print_one_str(spu_ptr, n_cols, &code_number);
 		}
-		else
+	}
+	else 
+	{
+		for (ssize_t row = 0; row < rows; row++)
 		{
-			putchar(' ');
+			print_one_str(spu_ptr, n_cols, &code_number);
 		}
 
-		putchar(' ');
-	} 
+		print_ip(spu_ptr, n_cols, left_code_number, ip_row);
+	}
 
-	putchar('\n');
 
-	printf("}\n");
+	print_one_str(spu_ptr, (right_code_number - left_code_number) % n_cols, &code_number);
 
 	print_data(&(spu_ptr->stk), print_poison_stack_data_count);
 
@@ -165,3 +155,57 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 }
 
 
+static void print_ip(const struct Processor* const spu_ptr, const ssize_t n_cols, const ssize_t left_code_number, ssize_t ip_row)
+{
+	printf("\t       ");
+
+	for (ssize_t row = 0; row < (spu_ptr->ip - left_code_number) % n_cols; row++)
+	{
+		for (ssize_t space_number = 0; space_number < SPU_CODE_PRINTF_WIDE; space_number++)
+		{
+			putchar(' ');
+		}	
+	}
+
+	putchar('^');
+
+	putchar('\n');
+
+	printf("\t       ");
+
+	for (ssize_t row = 0; row < (spu_ptr->ip - left_code_number) % n_cols; row++)
+	{
+		for (ssize_t space_number = 0; space_number < SPU_CODE_PRINTF_WIDE; space_number++)
+		{
+			putchar(' ');
+		}	
+	}
+
+	printf("ip = %zd", spu_ptr->ip);
+
+	putchar('\n');
+}
+
+static void print_one_str(const struct Processor* const spu_ptr, const ssize_t n_cols, ssize_t*  code_number_ptr)
+{
+	printf("\tnumber");
+	for (ssize_t col = 0; col < n_cols; col++)
+	{
+		printf("%*d ", SPU_CODE_PRINTF_WIDE, *code_number_ptr);
+		(*code_number_ptr)++;
+	}
+
+	putchar('\n');
+	printf("\tcode  ");
+
+	*code_number_ptr -= n_cols;
+
+	for (ssize_t col = 0; col < n_cols; col++)
+	{
+		printf(PROCESSOR_CODE_PRINTF_SPEC, (spu_ptr->code)[*code_number_ptr]);
+		putchar(' ');
+		(*code_number_ptr)++;
+	}
+
+	putchar('\n');
+}
