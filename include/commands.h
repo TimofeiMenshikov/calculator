@@ -1,26 +1,28 @@
 DEF_CMD(PUSH,  1, 
 {
-	printed_numbers = print_push_bytecode(string, n_string, outputfile);
+	printed_numbers = print_push_bytecode(string, n_string, code_arr, code_ip_ptr);
 },
 {
-	printed_numbers = print_push_command(string, n_string, outputfile);
+	printed_numbers = print_push_command(code_arr, code_ip_ptr, outputfile);
 },
 {
 	return_code |= do_push_command(spu_ptr, spu_ptr->code[spu_ptr->ip]);
 })
 DEF_CMD(POP,   -1,  
 {
-	printed_numbers = print_pop_bytecode(string, n_string, outputfile);
+	printed_numbers = print_pop_bytecode(string, n_string, code_arr, code_ip_ptr);
 },
 {
-	printed_numbers = print_pop_command(string, n_string, outputfile);
+	printed_numbers = print_pop_command(code_arr, code_ip_ptr, outputfile);
 },
 {
 	return_code |= do_pop_command(spu_ptr);
 })
 DEF_CMD(ADD,   2,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", ADD);
+	code_arr[*code_ip_ptr] = ADD;
+	(*code_ip_ptr)++;
+	printf("code_ip_ptr++\n");
 },
 {
 	printed_numbers = fprintf(outputfile, "ADD");
@@ -30,17 +32,21 @@ DEF_CMD(ADD,   2,
 })
 DEF_CMD(SUB,  -2,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", SUB);
+	code_arr[*code_ip_ptr] = SUB;
+	(*code_ip_ptr)++;
+	printf("code_ip_ptr++\n");
 },
 {
-	printed_numbers = fprintf(outputfile, "ADD");
+	printed_numbers = fprintf(outputfile, "SUB");
 },
 {
 	return_code |= do_bin_command(&(spu_ptr->stk), do_sub_command);		
 })
 DEF_CMD(MUL,   3,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", MUL);
+	code_arr[*code_ip_ptr] = MUL;
+	(*code_ip_ptr)++;
+	printf("code_ip_ptr++\n");
 },
 {
 	printed_numbers = fprintf(outputfile, "MUL");
@@ -50,7 +56,9 @@ DEF_CMD(MUL,   3,
 }) 
 DEF_CMD(DIV,  -3,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", DIV);
+	code_arr[*code_ip_ptr] = DIV;
+	(*code_ip_ptr)++;
+	printf("code_ip_ptr++\n");
 },
 {
 	printed_numbers = fprintf(outputfile, "DIV");
@@ -60,7 +68,9 @@ DEF_CMD(DIV,  -3,
 })
 DEF_CMD(SQRT, -4,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", SQRT);
+	code_arr[*code_ip_ptr] = SQRT;
+	(*code_ip_ptr)++;
+	printf("code_ip_ptr++\n");
 },
 {
 	printed_numbers = fprintf(outputfile, "SQRT");
@@ -70,7 +80,8 @@ DEF_CMD(SQRT, -4,
 })
 DEF_CMD(SIN,   5,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", SIN);
+	code_arr[*code_ip_ptr] = SIN;
+	(*code_ip_ptr)++;
 },
 {
 	printed_numbers = fprintf(outputfile, "SIN");
@@ -80,7 +91,8 @@ DEF_CMD(SIN,   5,
 })
 DEF_CMD(COS,  -5,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", COS);
+	code_arr[*code_ip_ptr] = COS;
+	(*code_ip_ptr)++;
 },
 {
 	printed_numbers = fprintf(outputfile, "COS");
@@ -90,7 +102,8 @@ DEF_CMD(COS,  -5,
 })
 DEF_CMD(OUT,   6,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", OUT);
+	code_arr[*code_ip_ptr] = OUT;
+	(*code_ip_ptr)++;
 },
 {
 	printed_numbers = fprintf(outputfile, "OUT");
@@ -100,7 +113,8 @@ DEF_CMD(OUT,   6,
 })
 DEF_CMD(HLT,   7, 
 {
-	printed_numbers = fprintf(outputfile, "%d ", HLT);
+	code_arr[*code_ip_ptr] = HLT;
+	(*code_ip_ptr)++;
 },
 {
 	printed_numbers = fprintf(outputfile, "HLT");
@@ -110,7 +124,8 @@ DEF_CMD(HLT,   7,
 })
 DEF_CMD(IN,    8,  
 {
-	printed_numbers = fprintf(outputfile, "%d ", IN);
+	code_arr[*code_ip_ptr] = IN;
+	(*code_ip_ptr)++;
 },
 {
 	printed_numbers = fprintf(outputfile, "IN");
@@ -120,10 +135,10 @@ DEF_CMD(IN,    8,
 })
 DEF_CMD(RPUSH, 9,  
 {
-	printed_numbers = print_rpush_bytecode(string, n_string, outputfile);
+	printed_numbers = print_rpush_bytecode(string, n_string, code_arr, code_ip_ptr);
 },
 {
-	printed_numbers = print_rpush_command(string, n_string, outputfile);
+	printed_numbers = print_rpush_command(code_arr, code_ip_ptr, outputfile);
 },
 {
 	return_code |= do_push_command(spu_ptr, spu_ptr->r_x[(ssize_t) spu_ptr->code[spu_ptr->ip]]);	

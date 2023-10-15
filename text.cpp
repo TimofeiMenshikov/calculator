@@ -4,6 +4,7 @@
 #include <malloc.h>
 #include "include/printf_debug.h"
 #include "include/text.h"
+#include "stack/include/stack.h"
 
 
 FILE* open_file(const char* const filename, const char* const modificator)
@@ -49,6 +50,24 @@ char* init_buffer_from_file(const char* const filename, size_t* buffer_size_ptr)
 	*buffer_size_ptr = buffer_size; 
 
 	return buffer;
+}
+
+
+void* init_code_from_bin_file(elem_t* code_size_ptr)
+{
+	FILE* inputfile = open_file("txt/code.bin", "rb");
+
+	elem_t input_arr_size = 0;
+
+	fread((void*) &input_arr_size, sizeof(elem_t), 1, inputfile);
+
+	void* input_arr = calloc((size_t)input_arr_size, sizeof(elem_t)); 
+
+	fread(input_arr, sizeof(elem_t), (size_t)input_arr_size, inputfile);
+
+	*code_size_ptr = input_arr_size;
+
+	return input_arr;
 }
 
 
@@ -133,41 +152,3 @@ void free_text(char** text)
 	text = 0;
 }
 
-
-void from_txt_to_bin(const char* const inputfile_name, const char* const outputfile_name)
-{
-	FILE* inputfile = open_file(inputfile_name, "rb");
-
-	FILE* outputfile = open_file(outputfile_name, "wb");
-
-	size_t buffer_size = 0;
-
-	void* text = (void*) init_buffer_from_file(inputfile_name, &buffer_size);
-
-	fread(text, sizeof(char), buffer_size, inputfile);
-
-	fwrite(text, sizeof(char), buffer_size, outputfile);
-
-	free(text);
-}
-
-
-void read_bin_as_chars(const char* const bin_filename)
-{
-	FILE* bin_file = open_file(bin_filename, "rb");
-
-	size_t buffer_size = 0;
-
-	char* text = (char*) init_buffer_from_file(bin_filename, &buffer_size);
-
-	ssize_t scanned_number = fread(text, sizeof(char), buffer_size, bin_file);
-
-	printf("scanned_number is %zd\n", scanned_number);
-
-	for (ssize_t char_number = 0; char_number < buffer_size; char_number++)
-	{
-		putchar(text[char_number]);
-	}
-
-	fclose(bin_file);
-}

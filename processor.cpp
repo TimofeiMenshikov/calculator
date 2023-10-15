@@ -8,7 +8,7 @@
 const ssize_t SPU_STACK_START_SIZE = 5;
 const ssize_t MAX_CODE_SIZE = 10;
 
-
+const char* bin_filename = "txt/code.bin";
 
 unsigned int processor_init(struct Processor* spu_ptr, const char* const filename)
 {
@@ -20,17 +20,13 @@ unsigned int processor_init(struct Processor* spu_ptr, const char* const filenam
 
 	return_code |= stack_init(&stk, SPU_STACK_START_SIZE);
 
-	printf("stack init\n");
-
 	if (return_code != NO_ERROR)								    	 
 	{														   		 
 		print_stack_error(return_code);						   		 
 		return return_code;									    	 
 	}														  
 															   		  		
-	return_code |= stack_verificator(&stk);      
-
-	printf("stack stack_verificator\n"); 		 
+	return_code |= stack_verificator(&stk);      	 
 
 	spu_ptr->stk = stk;
 
@@ -39,11 +35,7 @@ unsigned int processor_init(struct Processor* spu_ptr, const char* const filenam
 		(spu_ptr->r_x)[register_number] = POISON_VALUE;
 	}
 
-	printf("before init spu code\n");
-
 	return_code |= init_spu_code(spu_ptr, filename);
-
-	printf("init_spu_code\n");
 
 	spu_ptr->ip = 0;
 
@@ -72,84 +64,15 @@ unsigned int processor_dtor(struct Processor* spu_ptr)
 }
 
 
-unsigned int init_spu_code(struct Processor* spu_ptr, const char* const filename)
+unsigned int init_spu_code(struct Processor* spu_ptr, const char* const bin_filename)
 {
-	size_t buffer_size = 0;
+	elem_t code_size = 0;
 
-	char* buffer = init_buffer_from_file(filename, &buffer_size);
+	spu_ptr->code = (elem_t*) init_code_from_bin_file(&code_size);
 	
-	/*for (ssize_t char_number = 0; char_number < buffer_size; char_number++)
-	{
-		printf("%c(%d)\n", buffer[char_number], buffer[char_number]);
-	}*/
-
-	char* buffer_copy = buffer;
-
-	//printf("%s\n", buffer);
-
-	elem_t elem_t_number = 0;
-
-	ssize_t scanned_number = 0;
-
-	while (true)
-	{
-		#warning %n
-		ssize_t is_scanned = sscanf(buffer, "" STACK_ELEM_PRINTF_SPEC "", &elem_t_number);
-
-		//printf(" scanned: "STACK_ELEM_PRINTF_SPEC"\n", elem_t_number);
-
-		if (is_scanned <= 0)
-		{
-			break;
-		}
-
-		scanned_number++;
-
-		while ((buffer[0] != ' ') && (buffer[0] != '\n') && (buffer[0] != '\0'))
-		{
-			buffer++;
-		}
-
-		while ((buffer[0] == ' ') || (buffer[0] == '\n') || (buffer[0]) == '\0')
-		{
-			buffer++;
-		}
-
-		//printf("scanned_number: %zd\n", scanned_number);
-
-		//printf("----------------------------\n");
-
-		//printf("%s\n", buffer);
-
-		//printf("-----------------------------\n");
-	}
-
-	//printf("scanned_number: %zd\n", scanned_number);	
-
-	spu_ptr->code = (elem_t*) calloc(scanned_number, sizeof(elem_t));
-
-	spu_ptr->code_capacity = scanned_number;
-
-	//printf("spu_ptr->code_capacity %zd\n", spu_ptr->code_capacity);
-
-	for (ssize_t code_number = 0; code_number < scanned_number; code_number++)
-	{
-		ssize_t is_scanned = sscanf(buffer_copy, STACK_ELEM_PRINTF_SPEC, &((spu_ptr->code)[code_number]));
-
-		while ((buffer_copy[0] != ' ') && (buffer_copy[0] != '\n') && (buffer_copy[0] != '\0'))
-		{
-			buffer_copy++;
-		}
-
-		while ((buffer_copy[0] == ' ') || (buffer_copy[0] == '\n') || (buffer_copy[0]) == '\0')
-		{
-			buffer_copy++;
-		}
-	}
+	spu_ptr->code_capacity = (ssize_t) code_size;
 
 	return NO_ERROR;
-	
-
 }
 
 
@@ -194,7 +117,7 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 
 	for (ssize_t code_number = left_code_number; code_number < right_code_number; code_number++)
 	{
-		printf("%*zd", SPU_CODE_PRINTF_WIDE, code_number);
+		printf("%*d", SPU_CODE_PRINTF_WIDE, code_number);
 		putchar(' ');
 	}
 	#warning print code as fixed width table

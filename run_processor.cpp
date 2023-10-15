@@ -18,9 +18,11 @@ const double EPS = 0.0001;
 const char* inputfile_name = "txt/for_disasm.txt";
 
 
-static unsigned int do_push_command(struct Processor* spu_ptr);
+static unsigned int do_push_command(struct Processor* spu_ptr, elem_t push_number);
+static unsigned int do_in_command(struct Stack* stk_ptr);
 static unsigned int do_command(struct Processor* spu_ptr);
 static unsigned int run_processor(struct Processor* spu_ptr);
+static unsigned int do_out_command(struct Stack* stk_ptr);
 
 #define start_processor_stack()         				   	   		 \
 	struct Stack stk;       								   		 \
@@ -109,9 +111,7 @@ static unsigned int do_in_command(struct Stack* stk_ptr)
 
 
 static unsigned int do_out_command(struct Stack* stk_ptr)
-{																																
-	elem_t push_number = 0;
-
+{																														
 	unsigned int return_code = stack_pop(stk_ptr);
 
 	if (return_code != NO_ERROR)
@@ -243,7 +243,7 @@ static unsigned int do_command(struct Processor* spu_ptr)
 {		
 	unsigned int return_code = NO_ERROR;
 
-	command_t command = spu_ptr->code[spu_ptr->ip];
+	command_t command = (command_t) spu_ptr->code[spu_ptr->ip];
 
 	spu_ptr->ip++;
 
@@ -251,23 +251,7 @@ static unsigned int do_command(struct Processor* spu_ptr)
 	#define DEF_CMD(cmd_name, number, asm_func, disasm_func, spu_func) 	\
 		if (command == cmd_name) spu_func								\
 
-
 	#include "include/commands.h"
-
-	/*if (command == PUSH) 	return_code |= do_push_command(spu_ptr, spu_ptr->code[spu_ptr->ip]);
-	if (command == RPUSH)   return_code |= do_push_command(spu_ptr, spu_ptr->r_x[(ssize_t) spu_ptr->code[spu_ptr->ip]]);
-	if (command == POP)		return_code |= do_pop_command(spu_ptr);
-
-	if (command == SQRT) 	return_code |= do_unary_command(&(spu_ptr->stk), do_sqrt_command);
-	if (command == ADD)		return_code |= do_bin_command(&(spu_ptr->stk), do_add_command);
-	if (command == SUB)		return_code |= do_bin_command(&(spu_ptr->stk), do_sub_command);
-	if (command == MUL)		return_code |= do_bin_command(&(spu_ptr->stk), do_mul_command);
-	if (command == DIV)		return_code |= do_bin_command(&(spu_ptr->stk), do_div_command);
-	if (command == SIN)		return_code |= do_unary_command(&(spu_ptr->stk), do_cos_command);
-	if (command == COS)		return_code |= do_unary_command(&(spu_ptr->stk), do_sin_command);
-	if (command == IN)      return_code |= do_in_command(&(spu_ptr->stk));
-	if (command == OUT)		return_code |= do_out_command(&(spu_ptr->stk)); */
-
 
 	#undef DEF_CMD
 	//////////////////////////////////////////////////////////////////////////////////
@@ -295,11 +279,7 @@ int main()
 {
 	struct Processor spu;
 
-	printf("start spu\n");
-
 	processor_init(&spu, inputfile_name);
-
-	printf("processor has been init\n");
 
 	run_processor(&spu);
 
