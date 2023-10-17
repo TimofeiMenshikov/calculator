@@ -42,66 +42,6 @@ int main()
 }
 
 
-static size_t print_push_bytecode(const char* const string, const ssize_t n_string, elem_t* code_arr, ssize_t* code_ip_ptr)																
-{																							
-	code_arr[*code_ip_ptr] = PUSH;
-	(*code_ip_ptr)++;  
-
-	elem_t push_number = 0; 																
-	int is_scanned = sscanf(string + sizeof("PUSH"), " " STACK_ELEM_PRINTF_SPEC " ", &push_number);	
-	
-	if (!is_scanned)
-	{
-		fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);
-	}
-
-	code_arr[*code_ip_ptr] = push_number;
-	(*code_ip_ptr)++;
-
-	return NO_ERROR;							
-}
-
-
-static size_t print_pop_bytecode(const char* const string, const ssize_t n_string, elem_t* code_arr, ssize_t* code_ip_ptr)																
-{																							
-	code_arr[*code_ip_ptr] = POP;
-	(*code_ip_ptr)++;  
-
-	char register_name[REGISTER_NAME_SIZE] = {}; 																
-	int is_scanned = sscanf(string + sizeof("POP"), "%s", register_name);	
-	
-	if (!is_scanned)
-	{
-		fprintf(stderr, "string %zu: invalid pop register\n", n_string + 1);
-	}
-
-	code_arr[*code_ip_ptr] = register_name[REGISTER_LETTER_POS] - 'A';
-	(*code_ip_ptr)++;
-
-	return NO_ERROR;							
-}
-
-
-static size_t print_rpush_bytecode(const char* const string, const ssize_t n_string, elem_t* code_arr, ssize_t* code_ip_ptr)																
-{																							
-	code_arr[*code_ip_ptr] = RPUSH;
-	(*code_ip_ptr)++;  
-
-	char register_name[REGISTER_NAME_SIZE] = {}; 																
-	int is_scanned = sscanf(string + sizeof("RPUSH"), "%s", register_name);	
-	
-	if (!is_scanned)
-	{
-		fprintf(stderr, "string %zu: invalid rpush register\n", n_string + 1);
-	}
-
-	code_arr[*code_ip_ptr] = register_name[REGISTER_LETTER_POS] - 'A';
-	(*code_ip_ptr)++;
-
-	return NO_ERROR;							
-}
-
-
 static size_t print_bytecode(const char* const string, const ssize_t n_string, elem_t* code_arr, ssize_t* code_ip_ptr)
 {	
 	size_t printed_numbers = 0;
@@ -109,7 +49,7 @@ static size_t print_bytecode(const char* const string, const ssize_t n_string, e
 	enum arg_types_command argument_type = NO_ARGS;
 
 	///////////////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, arg_type, asm_func, disasm_func, spu_func)									\
+	#define DEF_CMD(cmd_name, number, arg_type, disasm_func, spu_func)									\
 		if (IS_COMMAND(#cmd_name)) 																					\
 		{																											\
 			code_arr[*code_ip_ptr] = number;																		\

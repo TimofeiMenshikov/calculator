@@ -86,15 +86,40 @@ static size_t print_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* output
 {		
 	size_t printed_numbers = 0;
 
-	printf("[%p]\n", code_arr);
-
 	command_t command = (command_t) code_arr[*code_ip_ptr];
 
 	(*code_ip_ptr)++;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, arg_type, asm_func, disasm_func, spu_func) 	\
-	if (command == cmd_name) disasm_func								\
+	#define DEF_CMD(cmd_name, number, arg_type, disasm_func, spu_func)												\
+		if (command == number) 																						\
+		{																											\
+			printed_numbers = fprintf(outputfile, #cmd_name);							 							\
+			putc(' ', outputfile);																					\
+																													\
+			if (arg_type == NUM_ARG)																				\
+			{																										\
+				elem_t arg_number = code_arr[*code_ip_ptr];															\
+																													\
+				(*code_ip_ptr)++;																					\
+																													\
+				fprintf(outputfile, "" STACK_ELEM_PRINTF_SPEC "", arg_number);										\
+			}																										\
+																													\
+			if (arg_type == REG_ARG)																				\
+			{																										\
+				elem_t pop_number = code_arr[*code_ip_ptr];															\
+																													\
+				(*code_ip_ptr)++;																					\
+																													\
+				putc('R', outputfile);																				\
+				putc('A' + (int) pop_number, outputfile);															\
+				putc('X', outputfile);																				\
+																													\
+			}																										\
+																													\
+		}																											\
+
 
 	#include "include/commands.h"
 

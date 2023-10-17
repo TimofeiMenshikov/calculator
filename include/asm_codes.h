@@ -7,7 +7,7 @@
 
 
 	////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, arg_type, asm_func, disasm_func, spu_func) \
+	#define DEF_CMD(cmd_name, number, arg_type, disasm_func, spu_func) \
 		cmd_name = number, 											   \
 
 
