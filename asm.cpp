@@ -16,7 +16,7 @@ const char* bin_filename = "txt/code.bin";
 static size_t print_push_bytecode(const char* const string, const ssize_t n_string, elem_t* code_arr, ssize_t* code_ip_ptr);
 static size_t print_bytecode(const char* const string, const ssize_t n_string, elem_t* code_arr, ssize_t* code_ip_ptr);
 
-#define IS_COMMAND(command) strncmp(string, command, sizeof(command) - 1) == 0
+#define IS_COMMAND(command) strncmp(string, command, sizeof(command) - 1) == 0 //не работает с командами, которые являются частями других команд
 
 const ssize_t max_code_size = 1000;
 
@@ -48,31 +48,22 @@ static size_t print_bytecode(const char* const string, const ssize_t n_string, e
 
 	enum arg_types_command argument_type = NO_ARGS;
 
-	///////////////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, arg_type, disasm_func, spu_func)									\
-		if (IS_COMMAND(#cmd_name)) 																					\
-		{																											\
-			code_arr[*code_ip_ptr] = number;																		\
-																													\
-			(*code_ip_ptr)++;																						\
-			argument_type = arg_type;    																			\
-																													\
-			if (arg_type == NUM_ARG)																				\
-			{																										\
-				elem_t arg_number = 0; 																				\
-				int is_scanned = sscanf(string + sizeof(#cmd_name), " " STACK_ELEM_PRINTF_SPEC " ", &arg_number);	\
-																													\
-				if (!is_scanned)																					\
-				{																									\
-					fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);								\
-				}																									\
-																													\
-				code_arr[*code_ip_ptr] = arg_number;																\
-				(*code_ip_ptr)++;																					\
-			}																										\
-																													\
-			if (arg_type == REG_ARG)																				\
-			{																										\
+
+	#define PRINT_CMD_WITH_NUM_ARG(cmd_name, number)															\
+																												\
+			elem_t arg_number = 0; 																				\
+			int is_scanned = sscanf(string + sizeof(#cmd_name), " " STACK_ELEM_PRINTF_SPEC " ", &arg_number);	\
+																												\
+			if (!is_scanned)																					\
+			{																									\
+				fprintf(stderr, "string %zu: invalid arg number\n", n_string + 1);								\
+			}																									\
+																												\
+			code_arr[*code_ip_ptr] = arg_number;																\
+			(*code_ip_ptr)++;																					\
+
+
+	#define PRINT_CMD_WITH_REG_ARG(cmd_name, number)																\
 				char register_name[REGISTER_NAME_SIZE] = {}; 														\
 				int is_scanned = sscanf(string + sizeof(#cmd_name), "%s", register_name);							\
 																													\
@@ -83,15 +74,41 @@ static size_t print_bytecode(const char* const string, const ssize_t n_string, e
 																													\
 				code_arr[*code_ip_ptr] = register_name[REGISTER_LETTER_POS] - 'A';									\
 				(*code_ip_ptr)++;																					\
-			}																										\
+
+
+	///////////////////////////////////////////////////////////////////////////////////
+	#define DEF_CMD(cmd_name, number, arg_type, spu_func)															\
+		if (IS_COMMAND(#cmd_name)) 																					\
+		{																											\
+			code_arr[*code_ip_ptr] = number;																		\
 																													\
+			(*code_ip_ptr)++;																						\
+			argument_type = arg_type;    																			\
+																													\
+			if (arg_type == NUM_ARG)																				\
+			{																										\
+				PRINT_CMD_WITH_NUM_ARG(cmd_name, number);															\
+			}																										\
+			else if (arg_type == REG_ARG)																			\
+			{																										\
+				PRINT_CMD_WITH_REG_ARG(cmd_name, number);															\
+			}																										\
+			else if (arg_type == NUM_OR_LABEL_ARG)																	\
+			{																										\
+				PRINT_CMD_WITH_NUM_ARG(cmd_name, number);															\
+			}																										\
 		}																											\
+		else  																										\
 
 
 
 
 	#include "include/commands.h"
 
+	/* else */ fprintf(stderr, "invalid command");
+
+	#undef PRINT_CMD_WITH_NUM_ARG
+	#undef PRINT_CMD_WITH_REG_ARG
 	#undef DEF_CMD
 	////////////////////////////////////////////////////////////////////////////////////
 

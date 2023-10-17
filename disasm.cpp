@@ -36,52 +36,6 @@ int main()
 }
 
 
-static size_t print_push_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* outputfile)																
-{																							
-	size_t printed_numbers = fprintf(outputfile, "PUSH ");    									
-	
-	elem_t push_number = code_arr[*code_ip_ptr];
-
-	(*code_ip_ptr)++;
-
-	fprintf(outputfile, "" STACK_ELEM_PRINTF_SPEC "", push_number);
-
-	return printed_numbers;							
-}
-
-
-static size_t print_pop_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* outputfile)																
-{																							
-	size_t printed_numbers = fprintf(outputfile, "POP ");    									
-
-	elem_t pop_number = code_arr[*code_ip_ptr];
-
-	(*code_ip_ptr)++;
-
-	putc('R', outputfile);
-	putc('A' + (int) pop_number, outputfile);
-	putc('X', outputfile);
-
-	return printed_numbers;							
-}
-
-
-static size_t print_rpush_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* outputfile)																
-{																							
-	size_t printed_numbers = fprintf(outputfile, "RPUSH ");
-
-	elem_t rpush_number = code_arr[*code_ip_ptr];
-
-	(*code_ip_ptr)++;
-
-	putc('R', outputfile);
-	putc('A' + (int) rpush_number, outputfile);
-	putc('X', outputfile);
-
-	return printed_numbers;							
-}
-
-
 static size_t print_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* outputfile)                                                              					
 {		
 	size_t printed_numbers = 0;
@@ -90,8 +44,30 @@ static size_t print_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* output
 
 	(*code_ip_ptr)++;
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	#define PRINT_CMD_WITH_NUM_ARG(cmd_name, number)														\
+		elem_t arg_number = code_arr[*code_ip_ptr];															\
+																											\
+		(*code_ip_ptr)++;																					\
+																											\
+		fprintf(outputfile, "" STACK_ELEM_PRINTF_SPEC "", arg_number);										\
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	#define PRINT_CMD_WITH_REG_ARG(cmd_name, number)														\
+		elem_t pop_number = code_arr[*code_ip_ptr];															\
+																											\
+		(*code_ip_ptr)++;																					\
+																											\
+		putc('R', outputfile);																				\
+		putc('A' + (int) pop_number, outputfile);															\
+		putc('X', outputfile);																				\
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, arg_type, disasm_func, spu_func)												\
+	#define DEF_CMD(cmd_name, number, arg_type, spu_func)															\
 		if (command == number) 																						\
 		{																											\
 			printed_numbers = fprintf(outputfile, #cmd_name);							 							\
@@ -99,30 +75,24 @@ static size_t print_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* output
 																													\
 			if (arg_type == NUM_ARG)																				\
 			{																										\
-				elem_t arg_number = code_arr[*code_ip_ptr];															\
-																													\
-				(*code_ip_ptr)++;																					\
-																													\
-				fprintf(outputfile, "" STACK_ELEM_PRINTF_SPEC "", arg_number);										\
+				PRINT_CMD_WITH_NUM_ARG(cmd_name, number)															\
 			}																										\
-																													\
-			if (arg_type == REG_ARG)																				\
+			else if (arg_type == REG_ARG)																			\
 			{																										\
-				elem_t pop_number = code_arr[*code_ip_ptr];															\
-																													\
-				(*code_ip_ptr)++;																					\
-																													\
-				putc('R', outputfile);																				\
-				putc('A' + (int) pop_number, outputfile);															\
-				putc('X', outputfile);																				\
-																													\
+				PRINT_CMD_WITH_REG_ARG(cmd_name, number)															\
 			}																										\
-																													\
+			else if (arg_type == NUM_OR_LABEL_ARG)																	\
+			{																										\
+				PRINT_CMD_WITH_NUM_ARG(cmd_name, number)															\
+			}																										\
 		}																											\
 
 
 	#include "include/commands.h"
 
+
+	#undef PRINT_CMD_WITH_NUM_ARG
+	#undef PRINT_CMD_WITH_REG_ARG
 	#undef DEF_CMD
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 

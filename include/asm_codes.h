@@ -7,15 +7,16 @@
 
 
 	////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, arg_type, disasm_func, spu_func) \
-		cmd_name = number, 											   \
+	#define DEF_CMD(cmd_name, number, arg_type, spu_func) 			\
+		cmd_name = number, 											\
 
 
 	enum arg_types_command
 	{
 		NO_ARGS = 0,
 		NUM_ARG = 1,
-		REG_ARG = 2
+		REG_ARG = 2,
+		NUM_OR_LABEL_ARG = 4
 	};
 
 	enum asm_codes

@@ -239,6 +239,93 @@ static unsigned int do_unary_command(struct Stack* stk_ptr, elem_t (*command_nam
 }
 
 
+static unsigned int do_jmp_command(struct Processor* spu_ptr)
+{
+	spu_ptr->ip = spu_ptr->code[spu_ptr->ip];
+
+	printf("spu_ptr->ip = %zd\n", spu_ptr->ip);
+
+	return NO_ERROR;
+}
+
+
+static bool is_below(const elem_t penult, const elem_t last)
+{
+	return penult < last;
+}
+
+static bool is_below_or_equal(const elem_t penult, const elem_t last)
+{
+	return penult <= last;
+}
+
+static bool is_above(const elem_t penult, const elem_t last)
+{
+	return penult > last;
+}
+
+static bool is_above_or_equal(const elem_t penult, const elem_t last)
+{
+	return penult >= last;
+}
+
+static bool is_equal(const elem_t penult, const elem_t last)
+{
+	return (ssize_t)penult == (ssize_t)last;
+}
+
+static bool is_not_equal(const elem_t penult, const elem_t last)
+{
+	return (ssize_t)penult != (ssize_t)last;
+}
+
+
+
+static unsigned int do_ifjmp_command(struct Processor* spu_ptr, bool(*if_function)(const elem_t penult, const elem_t last))
+{
+	unsigned int return_code = NO_ERROR;
+
+	return_code |= stack_pop(&(spu_ptr->stk));
+	print_stack(&(spu_ptr->stk), spu_ptr->stk.capacity);
+
+	if (return_code != NO_ERROR)
+	{
+		PRINT_ERR_POS();
+
+		print_stack_error(return_code);
+	}
+
+	elem_t last = spu_ptr->stk.last_popped_value;
+
+	return_code |= stack_pop(&(spu_ptr->stk));
+	print_stack(&(spu_ptr->stk), spu_ptr->stk.capacity);
+
+	if (return_code != NO_ERROR)
+	{
+		PRINT_ERR_POS();
+
+		print_stack_error(return_code);
+	}
+
+	elem_t penult = spu_ptr->stk.last_popped_value;
+
+
+	if (if_function(penult, last))
+	{
+		return_code |= do_jmp_command(spu_ptr);
+	}
+	else
+	{
+		(spu_ptr->ip)++;
+	}
+
+	return return_code;
+}
+
+
+
+
+
 static unsigned int do_command(struct Processor* spu_ptr)
 {		
 	unsigned int return_code = NO_ERROR;
@@ -248,8 +335,8 @@ static unsigned int do_command(struct Processor* spu_ptr)
 	spu_ptr->ip++;
 
 	///////////////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, arg_type, disasm_func, spu_func) 	\
-		if (command == cmd_name) spu_func								\
+	#define DEF_CMD(cmd_name, number, arg_type, spu_func) 								\
+		if (command == cmd_name) spu_func												\
 
 	#include "include/commands.h"
 
