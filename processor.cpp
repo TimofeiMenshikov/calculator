@@ -67,17 +67,21 @@ unsigned int processor_dtor(struct Processor* spu_ptr)
 }
 
 
+#warning do not hardcode 
+#warning unused argument bin_filename
+#warning generic init function, take struct, not file
 unsigned int init_spu_code(struct Processor* spu_ptr, const char* const bin_filename)
 {
-	elem_t code_size = 0;
+	struct Array code = init_code_from_bin_file();
 
-	spu_ptr->code = (elem_t*) init_code_from_bin_file(&code_size);
+	spu_ptr->code = (elem_t*) code.code;
 	
-	spu_ptr->code_capacity = (ssize_t) code_size;
+	spu_ptr->code_capacity = code.size;
 
 	return NO_ERROR;
 }
 
+//unsigned int err = init_spu(&spu, init_code_from_bin_file("file.txt"));
 
 unsigned int processor_verificator(const struct Processor* const spu_ptr)
 {
@@ -135,6 +139,8 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 		{
 			print_one_str(spu_ptr, n_cols, &code_number);
 		}
+
+		print_one_str(spu_ptr, (right_code_number - left_code_number) % n_cols, &code_number);
 	}
 	else 
 	{
@@ -143,11 +149,10 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 			print_one_str(spu_ptr, n_cols, &code_number);
 		}
 
+		print_one_str(spu_ptr, (right_code_number - left_code_number) % n_cols, &code_number);
+
 		print_ip(spu_ptr, n_cols, left_code_number, ip_row);
 	}
-
-
-	print_one_str(spu_ptr, (right_code_number - left_code_number) % n_cols, &code_number);
 
 	print_data(&(spu_ptr->stk), print_poison_stack_data_count);
 
@@ -157,11 +162,11 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 
 static void print_ip(const struct Processor* const spu_ptr, const ssize_t n_cols, const ssize_t left_code_number, ssize_t ip_row)
 {
-	printf("\t       ");
+	printf("\t           ");
 
 	for (ssize_t row = 0; row < (spu_ptr->ip - left_code_number) % n_cols; row++)
 	{
-		for (ssize_t space_number = 0; space_number < SPU_CODE_PRINTF_WIDE; space_number++)
+		for (ssize_t space_number = 0; space_number < SPU_CODE_PRINTF_WIDE + 1; space_number++)
 		{
 			putchar(' ');
 		}	
@@ -171,11 +176,11 @@ static void print_ip(const struct Processor* const spu_ptr, const ssize_t n_cols
 
 	putchar('\n');
 
-	printf("\t       ");
+	printf("\t           ");
 
 	for (ssize_t row = 0; row < (spu_ptr->ip - left_code_number) % n_cols; row++)
 	{
-		for (ssize_t space_number = 0; space_number < SPU_CODE_PRINTF_WIDE; space_number++)
+		for (ssize_t space_number = 0; space_number < SPU_CODE_PRINTF_WIDE + 1; space_number++)
 		{
 			putchar(' ');
 		}	

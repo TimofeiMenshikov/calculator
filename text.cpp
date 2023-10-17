@@ -12,8 +12,26 @@ FILE* open_file(const char* const filename, const char* const modificator)
 	FILE* inputfile = fopen(filename, modificator);
 
 	assert(inputfile);
+	#warning fail slower, but safer
 
 	return inputfile;
+}
+
+
+unsigned int array_verificator(const struct Array* const code_ptr)
+{
+	unsigned int arr_err = NO_ERROR;
+
+	if (code_ptr->size <= 0)
+	{
+		arr_err |= INVALID_ARRAY_SIZE;
+	}
+	if (code_ptr->code == NULL)
+	{
+		arr_err |= CODE_IS_NULL;
+	}
+
+	return arr_err;
 }
 
 
@@ -53,21 +71,32 @@ char* init_buffer_from_file(const char* const filename, size_t* buffer_size_ptr)
 }
 
 
-void* init_code_from_bin_file(elem_t* code_size_ptr)
+struct Array init_code_from_bin_file()
 {
 	FILE* inputfile = open_file("txt/code.bin", "rb");
 
-	elem_t input_arr_size = 0;
+	struct Array code_arr;
 
-	fread((void*) &input_arr_size, sizeof(elem_t), 1, inputfile);
+	#warning inputfile may be NULL
 
-	void* input_arr = calloc((size_t)input_arr_size, sizeof(elem_t)); 
+	elem_t code_size = 0;
 
-	fread(input_arr, sizeof(elem_t), (size_t)input_arr_size, inputfile);
+	fread((void*) &(code_size), sizeof(elem_t), 1, inputfile);
 
-	*code_size_ptr = input_arr_size;
+	code_arr.size = (ssize_t) code_size;
 
-	return input_arr;
+	code_arr.code = calloc(code_arr.size, sizeof(elem_t)); 
+
+	fread(code_arr.code, sizeof(elem_t), (size_t)code_arr.size, inputfile);
+
+	return code_arr;
+}
+
+
+void print_arr_error(const unsigned int err_arr)
+{
+	if (err_arr & CODE_IS_NULL) 	  printf("code is null\n");
+	if (err_arr & INVALID_ARRAY_SIZE) printf("invalid array size\n");
 }
 
 

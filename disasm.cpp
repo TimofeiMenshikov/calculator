@@ -8,7 +8,7 @@
 #include "stack/include/stack.h"
 
 
-static void disassembler(elem_t* code_arr, ssize_t code_size, FILE* outputfile);
+static void disassembler(struct Array* code_arr_ptr, FILE* outputfile);
 static size_t print_push_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* outputfile);
 static size_t print_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* outputfile);
 
@@ -19,13 +19,20 @@ const char* bin_filename = "txt/code.bin";
 
 int main()
 {
-	elem_t code_size = 0;
+	struct Array code = init_code_from_bin_file();
 
-	elem_t* code_arr = (elem_t*) init_code_from_bin_file(&code_size);
+	unsigned int arr_err = array_verificator(&code);
+
+	if (arr_err != NO_ERROR)
+	{
+		printf("invalid code array\n");
+
+		print_arr_error(arr_err);
+	}
 
 	FILE* outputfile = open_file(outputfile_name, "w");
 
-	disassembler(code_arr, (ssize_t)code_size, outputfile);
+	disassembler(&code, outputfile);
 }
 
 
@@ -79,11 +86,14 @@ static size_t print_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* output
 {		
 	size_t printed_numbers = 0;
 
+	printf("[%p]\n", code_arr);
+
 	command_t command = (command_t) code_arr[*code_ip_ptr];
+
 	(*code_ip_ptr)++;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, asm_func, disasm_func, spu_func) 	\
+	#define DEF_CMD(cmd_name, number, arg_type, asm_func, disasm_func, spu_func) 	\
 	if (command == cmd_name) disasm_func								\
 
 	#include "include/commands.h"
@@ -95,7 +105,7 @@ static size_t print_command(elem_t* code_arr, ssize_t* code_ip_ptr, FILE* output
 }
 
 
-static void disassembler(elem_t* code_arr, ssize_t code_size, FILE* outputfile)
+static void disassembler(struct Array* code_ptr, FILE*  outputfile)
 {
 	ssize_t printed_numbers = 0;
 
@@ -103,9 +113,9 @@ static void disassembler(elem_t* code_arr, ssize_t code_size, FILE* outputfile)
 
 	ssize_t code_ip = 0;
 
-	while (code_ip < code_size)
+	while (code_ip < code_ptr->size)
 	{
-		printed_numbers = print_command(code_arr, &code_ip, outputfile);
+		printed_numbers = print_command((elem_t*) code_ptr->code, &code_ip, outputfile);
 
 		if (printed_numbers > 0) 
 		{

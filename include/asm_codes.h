@@ -7,25 +7,19 @@
 
 
 	////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, asm_func, disasm_func, spu_func) \
+	#define DEF_CMD(cmd_name, number, arg_type, asm_func, disasm_func, spu_func) \
 		cmd_name = number, 											   \
+
+
+	enum arg_types_command
+	{
+		NO_ARGS = 0,
+		NUM_ARG = 1,
+		REG_ARG = 2
+	};
 
 	enum asm_codes
 	{
-		/*PUSH  =   1,
-		POP   =  -1,
-		ADD   =   2,
-		SUB   =  -2, 
-		MUL   =   3,
-		DIV   =  -3,
-		SQRT  =  -4,
-		SIN   =   5,
-		COS   =  -5,
-		OUT   =   6,
-		HLT   =   7,
-		IN 	  =   8,
-		RPUSH =   9 */
-
 		#include "commands.h"
 		END_CODE
 	};

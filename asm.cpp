@@ -30,11 +30,9 @@ int main()
 
 	elem_t* code_arr = (double*) calloc(max_code_size, sizeof(elem_t));
 
-	ssize_t last_code_ip = assembler(text, n_strings, code_arr + 1);
+	ssize_t last_code_ip = assembler(text, n_strings, code_arr + 1); // в массиве кода первый элемент - размер массива с кодом 
 
 	code_arr[0] = (double) last_code_ip;
-
-	printf("last_code_ip: %zd\n", last_code_ip);
 
 	fwrite((void*) code_arr, sizeof(elem_t), last_code_ip + 2, outputfile);
 
@@ -108,9 +106,49 @@ static size_t print_bytecode(const char* const string, const ssize_t n_string, e
 {	
 	size_t printed_numbers = 0;
 
+	enum arg_types_command argument_type = NO_ARGS;
+
 	///////////////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, asm_func, disasm_func, spu_func) 	\
-		if (IS_COMMAND(#cmd_name)) asm_func								\
+	#define DEF_CMD(cmd_name, number, arg_type, asm_func, disasm_func, spu_func)									\
+		if (IS_COMMAND(#cmd_name)) 																					\
+		{																											\
+			code_arr[*code_ip_ptr] = number;																		\
+																													\
+			(*code_ip_ptr)++;																						\
+			argument_type = arg_type;    																			\
+																													\
+			if (arg_type == NUM_ARG)																				\
+			{																										\
+				elem_t arg_number = 0; 																				\
+				int is_scanned = sscanf(string + sizeof(#cmd_name), " " STACK_ELEM_PRINTF_SPEC " ", &arg_number);	\
+																													\
+				if (!is_scanned)																					\
+				{																									\
+					fprintf(stderr, "string %zu: invalid push number\n", n_string + 1);								\
+				}																									\
+																													\
+				code_arr[*code_ip_ptr] = arg_number;																\
+				(*code_ip_ptr)++;																					\
+			}																										\
+																													\
+			if (arg_type == REG_ARG)																				\
+			{																										\
+				char register_name[REGISTER_NAME_SIZE] = {}; 														\
+				int is_scanned = sscanf(string + sizeof(#cmd_name), "%s", register_name);							\
+																													\
+				if (!is_scanned)																					\
+				{																									\
+					fprintf(stderr, "string %zu: invalid pop register\n", n_string + 1);							\
+				}																									\
+																													\
+				code_arr[*code_ip_ptr] = register_name[REGISTER_LETTER_POS] - 'A';									\
+				(*code_ip_ptr)++;																					\
+			}																										\
+																													\
+		}																											\
+
+
+
 
 	#include "include/commands.h"
 

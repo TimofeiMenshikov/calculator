@@ -248,7 +248,7 @@ static unsigned int do_command(struct Processor* spu_ptr)
 	spu_ptr->ip++;
 
 	///////////////////////////////////////////////////////////////////////////////////
-	#define DEF_CMD(cmd_name, number, asm_func, disasm_func, spu_func) 	\
+	#define DEF_CMD(cmd_name, number, arg_type, asm_func, disasm_func, spu_func) 	\
 		if (command == cmd_name) spu_func								\
 
 	#include "include/commands.h"
