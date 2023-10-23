@@ -54,6 +54,7 @@ DEF_CMD(OUT,  6, NO_ARGS,
 })
 DEF_CMD(HLT,  7, NO_ARGS, 
 {
+	printf("HLTHLTHLTHLTHLTHLTHLTHTLHTLTHTLHTLHTLTHTLHTLHTLHTHTLHT\n");
 	return return_code;
 })
 DEF_CMD(IN,  8, NO_ARGS,  
@@ -91,4 +92,32 @@ DEF_CMD(JE, 15, NUM_OR_LABEL_ARG,
 DEF_CMD(JNE, 16, NUM_OR_LABEL_ARG,
 {
 	return_code |= do_ifjmp_command(spu_ptr, is_not_equal);
+})
+DEF_CMD(RAM_PUSH, -6, NUM_ARG, 
+{
+	return_code |= do_ram_push_command(spu_ptr, spu_ptr->code[spu_ptr->ip]);
+})
+DEF_CMD(RAM_REG_PUSH, -7, REG_ARG, 
+{
+	return_code |= do_ram_push_command(spu_ptr, spu_ptr->r_x[(ssize_t) spu_ptr->code[spu_ptr->ip]]);
+})
+DEF_CMD(RAM_POP, -8, NUM_ARG,
+{
+	return_code |= do_ram_pop_command(spu_ptr, spu_ptr->code[spu_ptr->ip]);
+})
+DEF_CMD(RAM_REG_POP, -9, REG_ARG, 
+{
+	return_code |= do_ram_pop_command(spu_ptr, (spu_ptr->r_x)[(ssize_t) spu_ptr->code[spu_ptr->ip]]);
+})
+DEF_CMD(DRAW_RAM, -10, NO_ARGS,
+{
+	return_code |= do_draw_ram_command(spu_ptr->ram, RAM_SIZE / RAM_PRINTF_WIDE, RAM_PRINTF_WIDE);
+})
+DEF_CMD(CALL, -11, NUM_OR_LABEL_ARG,
+{
+	return_code |= do_call_command(spu_ptr);
+})
+DEF_CMD(RET, -12, NO_ARGS,
+{
+	return_code |= do_ret_command(spu_ptr);
 })

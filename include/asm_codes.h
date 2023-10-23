@@ -16,7 +16,9 @@
 		NO_ARGS = 0,
 		NUM_ARG = 1,
 		REG_ARG = 2,
-		NUM_OR_LABEL_ARG = 4
+		NUM_OR_LABEL_ARG = 4,
+		RAM_ARG = 8,
+		RAM_REG_ARG = 16
 	};
 
 	enum asm_codes

@@ -26,6 +26,6 @@
 	FILE* open_file(const char* const filename, const char* const modificator);
 	void free_text(char** text);
 
-	struct Array init_code_from_bin_file();
+	struct Array init_code_from_bin_file(const char* const bin_filename);
 
 #endif /* TEXT_H */

@@ -19,7 +19,7 @@ const char* bin_filename = "txt/code.bin";
 
 int main()
 {
-	struct Array code = init_code_from_bin_file();
+	struct Array code = init_code_from_bin_file("txt/code.bin");
 
 	unsigned int arr_err = array_verificator(&code);
 

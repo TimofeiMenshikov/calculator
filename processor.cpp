@@ -8,7 +8,6 @@
 const ssize_t SPU_STACK_START_SIZE = 5;
 const ssize_t MAX_CODE_SIZE = 10;
 
-const char* bin_filename = "txt/code.bin";
 
 static void print_one_str(const struct Processor* const spu_ptr, const ssize_t print_code_wide, ssize_t* code_number_ptr);
 static void print_ip(const struct Processor* const spu_ptr, const ssize_t n_cols, const ssize_t left_code_number, ssize_t ip_row);
@@ -27,18 +26,22 @@ unsigned int processor_init(struct Processor* spu_ptr, const char* const filenam
 	{														   		 
 		print_stack_error(return_code);						   		 
 		return return_code;									    	 
-	}														  
-															   		  		
-	return_code |= stack_verificator(&stk);      	 
+	}	
 
-	spu_ptr->stk = stk;
+	return_code |= stack_init(&(spu_ptr->ret_positions), SPU_STACK_START_SIZE);
+
+	return_code |= processor_verificator(spu_ptr);
+
+	spu_ptr->stk = stk;      	 
 
 	for (ssize_t register_number = 0; register_number < REGISTER_COUNT; register_number++)
 	{
 		(spu_ptr->r_x)[register_number] = POISON_VALUE;
 	}
 
-	return_code |= init_spu_code(spu_ptr, filename);
+	return_code |= init_spu_code(spu_ptr);
+
+	return_code |= init_spu_ram(spu_ptr);
 
 	spu_ptr->ip = 0;
 
@@ -52,12 +55,16 @@ unsigned int processor_dtor(struct Processor* spu_ptr)
 
 	return_code |= stack_dtor(&(spu_ptr->stk));
 
+	return_code |= stack_dtor(&(spu_ptr->ret_positions));
+
 	for (ssize_t register_number = 0; register_number < REGISTER_COUNT; register_number++)
 	{
 		(spu_ptr->r_x)[register_number] = POISON_VALUE;
 	}
 
 	free(spu_ptr->code);
+
+
 
 	spu_ptr->code = NULL;
 
@@ -67,12 +74,23 @@ unsigned int processor_dtor(struct Processor* spu_ptr)
 }
 
 
-#warning do not hardcode 
-#warning unused argument bin_filename
-#warning generic init function, take struct, not file
-unsigned int init_spu_code(struct Processor* spu_ptr, const char* const bin_filename)
+unsigned int init_spu_ram(struct Processor* spu_ptr)
 {
-	struct Array code = init_code_from_bin_file();
+	unsigned int return_code = NO_ERROR;
+
+	for (ssize_t n_elem = 0; n_elem < RAM_SIZE; n_elem++)
+	{
+		*(spu_ptr->ram + n_elem) = POISON_VALUE;
+	}
+
+	return return_code;
+}
+
+
+#warning generic init function, take struct, not file
+unsigned int init_spu_code(struct Processor* spu_ptr)
+{
+	struct Array code = init_code_from_bin_file("txt/code.bin");
 
 	spu_ptr->code = (elem_t*) code.code;
 	
@@ -81,13 +99,14 @@ unsigned int init_spu_code(struct Processor* spu_ptr, const char* const bin_file
 	return NO_ERROR;
 }
 
-//unsigned int err = init_spu(&spu, init_code_from_bin_file("file.txt"));
 
 unsigned int processor_verificator(const struct Processor* const spu_ptr)
 {
 	unsigned int return_code = 0;
 
 	return_code |= stack_verificator(&(spu_ptr->stk));
+
+	return_code |= stack_verificator(&(spu_ptr->ret_positions));
 
 	if (spu_ptr->code == NULL) 		 return_code |= SPU_CODE_IS_NULL;
 
@@ -97,11 +116,13 @@ unsigned int processor_verificator(const struct Processor* const spu_ptr)
 
 	if (spu_ptr->ip >= spu_ptr->code_capacity)      return_code |= SPU_IP_IS_NOT_SMALLER_THAN_CODE;
 
+	if (spu_ptr->ram == NULL)                       return_code |= SPU_RAM_IS_NULL;
+
 	return return_code;
 }
 
 
-unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_t print_poison_stack_data_count, const ssize_t print_code_wide, const ssize_t n_cols)
+unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_t print_poison_stack_data_count, const ssize_t print_code_wide, const ssize_t n_cols, const ssize_t print_poison_ret_positions_stack_data_count)
 {
 	printf("processor spu [%p]\n", spu_ptr);
 
@@ -154,7 +175,13 @@ unsigned int processor_print(const struct Processor* const spu_ptr, const ssize_
 		print_ip(spu_ptr, n_cols, left_code_number, ip_row);
 	}
 
+	printf("\tstack:\n");
 	print_data(&(spu_ptr->stk), print_poison_stack_data_count);
+
+	printf("\treturn positions:\n");
+	print_data(&(spu_ptr->ret_positions), print_poison_ret_positions_stack_data_count);
+
+	printf("}\n");
 
 	return NO_ERROR;
 }

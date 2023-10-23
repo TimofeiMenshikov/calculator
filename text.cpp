@@ -71,9 +71,9 @@ char* init_buffer_from_file(const char* const filename, size_t* buffer_size_ptr)
 }
 
 
-struct Array init_code_from_bin_file()
+struct Array init_code_from_bin_file(const char* const bin_filename)
 {
-	FILE* inputfile = open_file("txt/code.bin", "rb");
+	FILE* inputfile = open_file(bin_filename, "rb");
 
 	struct Array code_arr;
 

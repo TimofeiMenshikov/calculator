@@ -64,7 +64,8 @@ enum error_code
 	SPU_CODE_IS_NULL						= 1 << 15,
 	INVALID_SPU_CODE_CAPACITY       		= 1 << 16,
 	INVALID_SPU_IP                  		= 1 << 17,
-	SPU_IP_IS_NOT_SMALLER_THAN_CODE      	= 1 << 18
+	SPU_IP_IS_NOT_SMALLER_THAN_CODE      	= 1 << 18,
+	SPU_RAM_IS_NULL							= 1 << 19
 };
 
 struct Stack_info
