@@ -7,48 +7,55 @@
 
 unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_count)
 {
-	printf("stack stk [%p]\n", stk_ptr);
+	unsigned int return_code = NO_ERROR;
 
-	printf("{\n");
-	printf("\tstack information\n");
+	#ifdef PRINT_PROCESSOR_STACK
 
-	printf("\t{\n");
-	printf("\t\twhere init:\n");
-	printf("\t\t  line: %d\n", stk_ptr->stk_info.init_line);
-	printf("\t\t  func: %s\n", stk_ptr->stk_info.init_func);
-	printf("\t\t  file: %s\n", stk_ptr->stk_info.init_file);
+		printf("stack stk [%p]\n", stk_ptr);
 
-	putchar('\n');
+		printf("{\n");
+		printf("\tstack information\n");
 
-	printf("\t\twhere called:\n");
-	printf("\t\t  line: %d\n", stk_ptr->stk_info.call_line);
-	printf("\t\t  func: %s\n", stk_ptr->stk_info.call_func);
-	printf("\t\t  file: %s\n", stk_ptr->stk_info.call_file);
-	
-	printf("\t}\n");
+		printf("\t{\n");
+		printf("\t\twhere init:\n");
+		printf("\t\t  line: %d\n", stk_ptr->stk_info.init_line);
+		printf("\t\t  func: %s\n", stk_ptr->stk_info.init_func);
+		printf("\t\t  file: %s\n", stk_ptr->stk_info.init_file);
 
-	printf("\tsize     = %zd\n", stk_ptr->size);
-	printf("\tcapacity = %zd\n", stk_ptr->capacity);
+		putchar('\n');
 
-	#ifdef HASH_PROTECTION
+		printf("\t\twhere called:\n");
+		printf("\t\t  line: %d\n", stk_ptr->stk_info.call_line);
+		printf("\t\t  func: %s\n", stk_ptr->stk_info.call_func);
+		printf("\t\t  file: %s\n", stk_ptr->stk_info.call_file);
+		
+		printf("\t}\n");
 
-		printf("\tstack  hash = " HASH_PRINTF_SPEC "\n", stk_ptr->hash_stack);      
-		printf("\tdata   hash = " HASH_PRINTF_SPEC "\n", stk_ptr->hash_data); 
+		printf("\tsize     = %zd\n", stk_ptr->size);
+		printf("\tcapacity = %zd\n", stk_ptr->capacity);
 
-	#endif /* HASH_PROTECTION */
 
-	#ifdef CANARY_PROTECTION
+		#ifdef HASH_PROTECTION
 
-		printf("\tstack canary left  = " CANARY_PRINTF_SPEC "\n", stk_ptr->left_canary);   
-		printf("\tstack canary right = " CANARY_PRINTF_SPEC "\n", stk_ptr->right_canary);   
+			printf("\tstack  hash = " HASH_PRINTF_SPEC "\n", stk_ptr->hash_stack);      
+			printf("\tdata   hash = " HASH_PRINTF_SPEC "\n", stk_ptr->hash_data); 
 
-	#endif /* CANARY_PROTECTION */ 
+		#endif /* HASH_PROTECTION */
 
-	printf("\tlast popped value = " STACK_ELEM_PRINTF_SPEC "\n", stk_ptr->last_popped_value); 
+		#ifdef CANARY_PROTECTION
 
-	unsigned int return_code = print_data(stk_ptr, print_poison_data_count);
+			printf("\tstack canary left  = " CANARY_PRINTF_SPEC "\n", stk_ptr->left_canary);   
+			printf("\tstack canary right = " CANARY_PRINTF_SPEC "\n", stk_ptr->right_canary);   
 
-	printf("}\n");
+		#endif /* CANARY_PROTECTION */ 
+
+		printf("\tlast popped value = " STACK_ELEM_PRINTF_SPEC "\n", stk_ptr->last_popped_value); 
+
+		return_code |= print_data(stk_ptr, print_poison_data_count);
+
+		printf("}\n");
+
+	#endif /* PRINT_PROCESSOR_STACK */
 
 	return return_code;
 }
@@ -56,47 +63,51 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 
 unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_data_count)
 {
-	unsigned int return_code = stack_verificator(stk_ptr);
+	#ifdef PRINT_PROCESSOR_STACK
 
-	if (return_code != 0)
-	{
-		PRINT_STACK_ERR("stack is not work correct\n");
+		unsigned int return_code = stack_verificator(stk_ptr);
 
-		print_stack_error(return_code);
+		if (return_code != 0)
+		{
+			PRINT_STACK_ERR("stack is not work correct\n");
 
-		return return_code;
-	}
+			print_stack_error(return_code);
 
-
-	printf("\tdata [%p]\n", stk_ptr->data);
-	printf("\t{\n");
-
-	#ifdef CANARY_PROTECTION
-
-		printf("\t\tleft canary:  " CANARY_PRINTF_SPEC "\n", *(get_left_canary_ptr(stk_ptr->data)));      						
-		printf("\t\tright canary: " CANARY_PRINTF_SPEC "\n", *(get_right_canary_ptr(stk_ptr->data, stk_ptr->capacity)));		
-
-	#endif /* CANARY_PROTECTION */
+			return return_code;
+		}
 
 
-	if (print_poison_data_count > (stk_ptr->capacity - stk_ptr->size)) // print_poison_data_count - сколько элементов, не находящихся в стеке нужно вывести. Если таких элементов меньше, то выводится весь массив
-	{
-		print_poison_data_count = stk_ptr->capacity - stk_ptr->size;
-	}
+		printf("\tdata [%p]\n", stk_ptr->data);
+		printf("\t{\n");
 
-	assert((print_poison_data_count + stk_ptr->size) <= stk_ptr->capacity);
+		#ifdef CANARY_PROTECTION
 
-	for (ssize_t element_number = 0; element_number < stk_ptr->size; element_number++)
-	{
-		printf("\t\t*[%zd] = " STACK_ELEM_PRINTF_SPEC "\n", element_number, stk_ptr->data[element_number]);
-	}
+			printf("\t\tleft canary:  " CANARY_PRINTF_SPEC "\n", *(get_left_canary_ptr(stk_ptr->data)));      						
+			printf("\t\tright canary: " CANARY_PRINTF_SPEC "\n", *(get_right_canary_ptr(stk_ptr->data, stk_ptr->capacity)));		
 
-	for (ssize_t element_number = stk_ptr->size; element_number < (print_poison_data_count +  stk_ptr->size); element_number++)
-	{
-		printf("\t\t [%zd] = " STACK_ELEM_PRINTF_SPEC "\n", element_number, stk_ptr->data[element_number]);       
-	}
+		#endif /* CANARY_PROTECTION */
 
-	printf("\t}\n");
+
+		if (print_poison_data_count > (stk_ptr->capacity - stk_ptr->size)) // print_poison_data_count - сколько элементов, не находящихся в стеке нужно вывести. Если таких элементов меньше, то выводится весь массив
+		{
+			print_poison_data_count = stk_ptr->capacity - stk_ptr->size;
+		}
+
+		assert((print_poison_data_count + stk_ptr->size) <= stk_ptr->capacity);
+
+		for (ssize_t element_number = 0; element_number < stk_ptr->size; element_number++)
+		{
+			printf("\t\t*[%zd] = " STACK_ELEM_PRINTF_SPEC "\n", element_number, stk_ptr->data[element_number]);
+		}
+
+		for (ssize_t element_number = stk_ptr->size; element_number < (print_poison_data_count +  stk_ptr->size); element_number++)
+		{
+			printf("\t\t [%zd] = " STACK_ELEM_PRINTF_SPEC "\n", element_number, stk_ptr->data[element_number]);       
+		}
+
+		printf("\t}\n");
+
+	#endif /* PRINT_PROCESSOR_STACK */
 
 	return NO_ERROR;
 }

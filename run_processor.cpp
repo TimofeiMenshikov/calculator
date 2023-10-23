@@ -22,6 +22,14 @@ static unsigned int do_command(struct Processor* spu_ptr);
 static unsigned int run_processor(struct Processor* spu_ptr);
 static unsigned int do_out_command(struct Stack* stk_ptr);
 
+#define CHECK_ERROR()					\
+	if (return_code != NO_ERROR)		\
+	{									\
+		PRINT_ERR_POS();				\
+										\
+		print_stack_error(return_code);	\
+	}									\
+
 
 static unsigned int do_pop_command(struct Processor* spu_ptr)
 {																																
@@ -33,12 +41,7 @@ static unsigned int do_pop_command(struct Processor* spu_ptr)
 
 	spu_ptr->r_x[(ssize_t) pop_number] =  spu_ptr->stk.last_popped_value;
 
-	if (return_code != NO_ERROR)
-	{
-		PRINT_ERR_POS();
-
-		print_stack_error(return_code);
-	}
+	CHECK_ERROR();
 
 	return return_code;							
 }
@@ -50,12 +53,7 @@ static unsigned int do_push_command(struct Processor* spu_ptr, elem_t push_numbe
 
 	unsigned int return_code = stack_push(&(spu_ptr->stk), push_number);
 
-	if (return_code != NO_ERROR)
-	{
-		PRINT_ERR_POS();
-
-		print_stack_error(return_code);
-	}
+	CHECK_ERROR();
 
 	return return_code;							
 }
@@ -74,12 +72,7 @@ static unsigned int do_in_command(struct Stack* stk_ptr)
 
 	unsigned int return_code = stack_push(stk_ptr, push_number);
 
-	if (return_code != NO_ERROR)
-	{
-		PRINT_ERR_POS();
-
-		print_stack_error(return_code);
-	}
+	CHECK_ERROR();
 
 	return return_code;							
 }
@@ -89,12 +82,7 @@ static unsigned int do_out_command(struct Stack* stk_ptr)
 {																														
 	unsigned int return_code = stack_pop(stk_ptr);
 
-	if (return_code != NO_ERROR)
-	{
-		PRINT_ERR_POS();
-
-		print_stack_error(return_code);
-	}
+	CHECK_ERROR();
 
 	printf("out: " STACK_ELEM_PRINTF_SPEC "\n", stk_ptr->last_popped_value);
 
@@ -108,12 +96,7 @@ static unsigned int do_ram_push_command(struct Processor* spu_ptr, const elem_t 
 
 	unsigned int return_code = stack_push(&(spu_ptr->stk), (spu_ptr->ram)[(ssize_t) ram_push_number]);
 
-	if (return_code != NO_ERROR)
-	{
-		PRINT_ERR_POS();
-
-		print_stack_error(return_code);
-	}
+	CHECK_ERROR();
 
 	return return_code;		
 }
@@ -127,12 +110,7 @@ static unsigned int do_ram_pop_command(struct Processor* spu_ptr, const elem_t r
 
 	spu_ptr->ram[(ssize_t) ram_pop_number] =  spu_ptr->stk.last_popped_value;
 
-	if (return_code != NO_ERROR)
-	{
-		PRINT_ERR_POS();
-
-		print_stack_error(return_code);
-	}
+	CHECK_ERROR();
 
 	return return_code;			
 }
@@ -172,64 +150,67 @@ static unsigned int do_draw_ram_command(const elem_t* const ram, const ssize_t n
 }
 
 
-static elem_t do_add_command(const elem_t a, const elem_t b)
+/*static elem_t do_ADD_command(const elem_t a, const elem_t b)
 {
 	return a + b;
 }
 
-static elem_t do_sub_command(const elem_t a, const elem_t b)
+static elem_t do_SUB_command(const elem_t a, const elem_t b)
 {
 	return a - b;
 }
 
-static elem_t do_mul_command(const elem_t a, const elem_t b)
+static elem_t do_MUL_command(const elem_t a, const elem_t b)
 {
 	return a * b;
 }
 
-static elem_t do_div_command(const elem_t a, const elem_t b)
+static elem_t do_DIV_command(const elem_t a, const elem_t b)
 {
 	return a / b;
+}*/
+
+
+#define DO_ADD_COMMAND(penult, last) penult + last
+#define DO_SUB_COMMAND(penult, last) penult - last
+#define DO_MUL_COMMAND(penult, last) penult * last
+#define DO_DIV_COMMAND(penult, last) penult / last
+
+
+#define do_bin_command(function_value) 							\
+{																\
+	return_code |= stack_pop(&(spu_ptr->stk));					\
+	print_stack(&(spu_ptr->stk), (spu_ptr->stk).capacity);		\
+																\
+	CHECK_ERROR();												\
+                                                 				\
+	elem_t last = (spu_ptr->stk).last_popped_value; 			\
+												 				\
+	return_code |= stack_pop(&(spu_ptr->stk));			 		\
+	print_stack(&(spu_ptr->stk), (spu_ptr->stk).capacity);	    \
+																\
+	CHECK_ERROR();												\
+																\
+	elem_t penult = ((spu_ptr->stk)).last_popped_value; 		\
+																\
+	return_code |= stack_push(&(spu_ptr->stk), function_value);	\
+																\
+	CHECK_ERROR();												\
 }
 
-
-static unsigned int do_bin_command(struct Stack* stk_ptr, elem_t  (*command_name)(const elem_t a, const elem_t b))
-{
-	unsigned int return_code = NO_ERROR;
-
-	return_code |= stack_pop(stk_ptr);			 			
-	print_stack(stk_ptr, stk_ptr->capacity);
-	if (return_code != NO_ERROR)				 			
-	{											 			
-		PRINT_ERR_POS()							 			
-												 			
-		print_stack_error(return_code);          			
-	}											 			
-                                                 			
-	elem_t pop_number_1 = stk_ptr->last_popped_value; 		
-												 			
-	return_code |= stack_pop(stk_ptr);			 			
-	print_stack(stk_ptr, stk_ptr->capacity);
-	if (return_code != NO_ERROR)				 			
-	{											 			
-		PRINT_ERR_POS()							 			
-												 			
-		print_stack_error(return_code);			 			
-	}											 			
-												 			
-	elem_t pop_number_2 = stk_ptr->last_popped_value; 		
-
-	return_code |= stack_push(stk_ptr, command_name(pop_number_2, pop_number_1));
-
-	if (return_code != NO_ERROR)				 			
-	{											 			
-		PRINT_ERR_POS()							 			
-												 			
-		print_stack_error(return_code);			 			
-	}		
-
-	return return_code; 	
-}
+/*
+#define do_unary_command(function_value)						\
+	return_code |= stack_pop(&(spu_ptr->stk));					\
+	print_stack(&(spu_ptr->stk), (spu_ptr->stk).capacity);		\
+																\
+	CHECK_ERROR();												\
+                                                 				\
+	elem_t last = (spu_ptr->stk).last_popped_value; 			\
+												 				\
+	return_code |= stack_push(&(spu_ptr->stk), function_value);	\
+																\
+	CHECK_ERROR();												\
+}	*/												
 
 
 static elem_t do_cos_command(const elem_t a)
@@ -255,30 +236,16 @@ static unsigned int do_unary_command(struct Stack* stk_ptr, elem_t (*command_nam
 
 	return_code |= stack_pop(stk_ptr);			 			
 	print_stack(stk_ptr, stk_ptr->capacity);
-	if (return_code != NO_ERROR)				 			
-	{											 			
-		PRINT_ERR_POS()							 			
-												 			
-		print_stack_error(return_code);          			
-	}											 			
+
+	CHECK_ERROR();										 			
                                                  			
 	elem_t pop_number_1 = stk_ptr->last_popped_value; 
 
-	if (return_code != NO_ERROR)				 			
-	{											 			
-		PRINT_ERR_POS()							 			
-												 			
-		print_stack_error(return_code);			 			
-	}
+	CHECK_ERROR();
 
 	return_code |= stack_push(stk_ptr, command_name(pop_number_1));
 
-	if (return_code != NO_ERROR)				 			
-	{											 			
-		PRINT_ERR_POS()							 			
-												 			
-		print_stack_error(return_code);			 			
-	}				
+	CHECK_ERROR();				
 
 	return return_code;
 }
@@ -316,7 +283,7 @@ static bool is_above_or_equal(const elem_t penult, const elem_t last)
 
 static bool is_equal(const elem_t penult, const elem_t last)
 {
-	return (penult - last) < EPS;
+	return penult == last;
 }
 
 static bool is_not_equal(const elem_t penult, const elem_t last)
@@ -332,27 +299,16 @@ static unsigned int do_ifjmp_command(struct Processor* spu_ptr, bool(*if_functio
 	return_code |= stack_pop(&(spu_ptr->stk));
 	print_stack(&(spu_ptr->stk), spu_ptr->stk.capacity);
 
-	if (return_code != NO_ERROR)
-	{
-		PRINT_ERR_POS();
-
-		print_stack_error(return_code);
-	}
+	CHECK_ERROR();
 
 	elem_t last = spu_ptr->stk.last_popped_value;
 
 	return_code |= stack_pop(&(spu_ptr->stk));
 	print_stack(&(spu_ptr->stk), spu_ptr->stk.capacity);
 
-	if (return_code != NO_ERROR)
-	{
-		PRINT_ERR_POS();
-
-		print_stack_error(return_code);
-	}
+	CHECK_ERROR();
 
 	elem_t penult = spu_ptr->stk.last_popped_value;
-
 
 	if (if_function(penult, last))
 	{
@@ -400,6 +356,9 @@ static unsigned int do_command(struct Processor* spu_ptr)
 
 	spu_ptr->ip++;
 
+	#warning read arg here
+
+	#warning replace to switchcase
 	///////////////////////////////////////////////////////////////////////////////////
 	#define DEF_CMD(cmd_name, number, arg_type, spu_func) 								\
 		if (command == cmd_name) spu_func												\
@@ -421,7 +380,7 @@ static unsigned int run_processor(struct Processor* spu_ptr)
 	{
 		return_code |= do_command(spu_ptr);
 
-		processor_print(spu_ptr, spu_ptr->stk.capacity, 100000, 7, 3);
+		processor_print(spu_ptr, spu_ptr->stk.capacity, 1, 3, 3);
 	}
 
 	return return_code;

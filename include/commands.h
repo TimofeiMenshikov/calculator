@@ -12,6 +12,14 @@
 
 )*/
 
+
+#define DEF_BIN_CMD(cmd_name, number, arg_type)									\
+DEF_CMD(cmd_name, number, NO_ARGS, 												\
+{																				\
+	do_bin_command(DO_##cmd_name##_COMMAND(last, penult));						\
+})	
+
+
 DEF_CMD(PUSH,  1, NUM_ARG,
 {
 	return_code |= do_push_command(spu_ptr, spu_ptr->code[spu_ptr->ip]);
@@ -20,9 +28,16 @@ DEF_CMD(POP, -1, REG_ARG,
 {
 	return_code |= do_pop_command(spu_ptr);
 })
-DEF_CMD(ADD,   2, NO_ARGS,
+
+
+DEF_BIN_CMD(ADD, 2, NO_ARGS)
+DEF_BIN_CMD(SUB, -2, NO_ARGS)
+DEF_BIN_CMD(MUL, 3, NO_ARGS)
+DEF_BIN_CMD(DIV, -3, NO_ARGS)
+
+/*DEF_CMD(ADD,   2, NO_ARGS,
 {
-	return_code |= do_bin_command(&(spu_ptr->stk), do_add_command);	
+	return_code |= do_bin_command(&(spu_ptr->stk), do_add_command (last, penult) );	
 })
 DEF_CMD(SUB,  -2, NO_ARGS, 
 {
@@ -35,7 +50,12 @@ DEF_CMD(MUL,   3, NO_ARGS,
 DEF_CMD(DIV,  -3, NO_ARGS,
 {
 	return_code |= do_bin_command(&(spu_ptr->stk), do_div_command);
-})
+})*/
+
+
+
+
+
 DEF_CMD(SQRT, -4, NO_ARGS,
 {
 	return_code |= do_unary_command(&(spu_ptr->stk), do_sqrt_command);

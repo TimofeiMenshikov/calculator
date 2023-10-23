@@ -1,8 +1,106 @@
-PUSH 1
-PUSH 2
-CALL 9
-PUSH 3
+CALL :input
+
+RPUSH RAX
+PUSH 0
+JE :linear ;линейное уравнение
+
+CALL :diskr ;дискриминант в rdx
+
+RPUSH RDX
+PUSH 0
+JA :quadratic2 ;2 корня дискриминант больше нуля
+
+RPUSH RDX
+PUSH 0
+JE :quadratic1 ;1 корень, дискриминант равен 0
+
+
+PUSH -228228 ;дискриминант < 0
+OUT
+
 HLT
-PUSH 9
-PUSH 8
+
+:input
+IN
+IN
+IN
+POP RCX
+POP RBX
+POP RAX
 RET
+:diskr
+RPUSH RBX
+RPUSH RBX
+MUL
+PUSH 4
+RPUSH RAX
+RPUSH RCX
+MUL
+MUL
+SUB
+POP RDX 
+RET
+
+
+:const
+PUSH 0
+RPUSH RCX
+JE :zero_a_b_c ;все нулевые коэффициенты бесконечно много решений
+PUSH -228
+OUT
+HLT
+
+
+:zero_a_b_c
+PUSH 228
+OUT
+HLT
+
+:linear
+RPUSH RBX
+PUSH 0
+JE :const ;коэффициенты a и b равны нулю 
+
+PUSH 0
+RPUSH RBX
+SUB
+RPUSH RCX
+DIV
+OUT
+HLT
+
+:quadratic1
+PUSH 0
+RPUSH RBX
+SUB
+PUSH 2
+RPUSH RAX
+MUL
+DIV
+OUT
+HLT
+
+:quadratic2
+PUSH 0
+RPUSH RBX
+SUB
+RPUSH RDX
+SQRT
+SUB
+PUSH 2
+RPUSH RAX
+MUL
+DIV
+PUSH 0
+RPUSH RBX
+SUB
+RPUSH RDX
+SQRT
+ADD
+PUSH 2
+RPUSH RAX
+MUL
+DIV
+OUT
+OUT
+HLT
