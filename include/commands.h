@@ -82,32 +82,7 @@ DEF_CMD(JMP, 10, NUM_OR_LABEL_ARG,
 {
 	return_code |= do_jmp_command(spu_ptr);	
 })
-/*
-DEF_CMD(JBE, 12, NUM_OR_LABEL_ARG,
-{
-	DO_IFJMP_COMMAND(JBE_FUNC(penult, last));							
-})
-DEF_CMD(JB, 11, NUM_OR_LABEL_ARG,
-{
-	DO_IFJMP_COMMAND(JB_FUNC(penult, last));
-})
-DEF_CMD(JAE, 14, NUM_OR_LABEL_ARG,
-{
-	DO_IFJMP_COMMAND(JAE_FUNC(penult, last));
-})
-DEF_CMD(JA, 13, NUM_OR_LABEL_ARG,
-{
-	DO_IFJMP_COMMAND(JA_FUNC(penult, last));
-})
-DEF_CMD(JE, 15, NUM_OR_LABEL_ARG,
-{
-	DO_IFJMP_COMMAND(JE_FUNC(penult, last));
-})
-DEF_CMD(JNE, 16, NUM_OR_LABEL_ARG,
-{
-	DO_IFJMP_COMMAND(JNE_FUNC(penult, last));
-})
-*/
+
 DEF_CMD(RAM_PUSH, -6, NUM_ARG, 
 {
 	return_code |= do_ram_push_command(spu_ptr, spu_ptr->code[spu_ptr->ip]);

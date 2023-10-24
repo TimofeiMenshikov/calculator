@@ -120,6 +120,40 @@ static size_t print_command_bytecode(const char*  string, const ssize_t n_string
 
 
 
+		#define PRINT_CMD_WITH_ARG(cmd_name, number, arg_type)			\
+			switch (arg_type)											\
+			{															\
+				case NUM_ARG: 											\
+				{														\
+					PRINT_CMD_WITH_NUM_ARG(cmd_name, number);			\
+            		break;												\
+				}														\
+				case REG_ARG:											\
+				{														\
+					PRINT_CMD_WITH_REG_ARG(cmd_name, number);			\
+					break;												\
+				}														\
+				case NUM_OR_LABEL_ARG:									\
+				{														\
+					PRINT_CMD_WITH_NUM_OR_LABEL_ARG(cmd_name, number);	\
+					break;												\
+				}														\
+				case RAM_ARG:											\
+				{														\
+					PRINT_CMD_WITH_NUM_ARG(cmd_name, number);			\
+					break;												\
+				}														\
+				case RAM_REG_ARG:										\
+				{														\
+					PRINT_CMD_WITH_REG_ARG(cmd_name, number);			\
+				}														\
+				default: 												\
+				{														\
+					fprintf(stderr, "invalid argument type\n");			\
+				}														\
+			}
+
+
 		///////////////////////////////////////////////////////////////////////////////////
 		#define DEF_CMD(cmd_name, number, arg_type, spu_func)															\
 			if (IS_COMMAND(#cmd_name)) 																					\
@@ -129,28 +163,7 @@ static size_t print_command_bytecode(const char*  string, const ssize_t n_string
 				(*code_ip_ptr)++;																						\
 				argument_type = arg_type;    																			\
 																														\
-				if (arg_type == NUM_ARG)																				\
-				{																										\
-					PRINT_CMD_WITH_NUM_ARG(cmd_name, number);															\
-				}																										\
-				else if (arg_type == REG_ARG)																			\
-				{																										\
-					PRINT_CMD_WITH_REG_ARG(cmd_name, number);															\
-				}																										\
-				else if (arg_type == NUM_OR_LABEL_ARG)																	\
-				{																										\
-					PRINT_CMD_WITH_NUM_OR_LABEL_ARG(cmd_name, number);													\
-				}																										\
-				else if (arg_type == RAM_ARG)																			\
-				{																										\
-					string++;																							\
-					PRINT_CMD_WITH_NUM_ARG(cmd_name, number);															\
-				}																										\
-				else if (arg_type == RAM_REG_ARG)																		\
-				{																										\
-					string++;																							\
-					PRINT_CMD_WITH_REG_ARG(cmd_name, number);															\
-				}																										\
+                PRINT_CMD_WITH_ARG(cmd_name, number, arg_type)															\
 			}																											\
 			else   // для следюющего if   																				\
 
@@ -158,8 +171,11 @@ static size_t print_command_bytecode(const char*  string, const ssize_t n_string
 
 		/* else */ fprintf(stderr, "invalid command\n");
 
+
+		#undef PRINT_CMD_WITH_NUM_OR_LABEL_ARG
 		#undef PRINT_CMD_WITH_NUM_ARG
 		#undef PRINT_CMD_WITH_REG_ARG
+		#undef PRINT_CMD_WITH_ARG
 		#undef DEF_CMD
 		////////////////////////////////////////////////////////////////////////////////////
 
