@@ -197,28 +197,40 @@ static unsigned int do_draw_ram_command(const elem_t* const ram, const ssize_t n
 	CHECK_ERROR();												\
 }
 
+#define JA_FUNC(penult, last) 	penult >  last
+#define JAE_FUNC(penult, last) 	penult >= last
+#define JB_FUNC(penult, last)  	penult <  last
+#define JBE_FUNC(penult, last)  penult <= last
+#define JE_FUNC(penult, last)	penult == last
+#define JNE_FUNC(penult, last)  penult != last
 
-
-/*static unsigned int do_unary_command(struct Stack* stk_ptr, elem_t (*command_name)(const elem_t a))
-{
-	unsigned int return_code = NO_ERROR;
-
-	return_code |= stack_pop(stk_ptr);			 			
-	print_stack(stk_ptr, stk_ptr->capacity);
-
-	CHECK_ERROR();										 			
-                                                 			
-	elem_t pop_number_1 = stk_ptr->last_popped_value; 
-
-	CHECK_ERROR();
-
-	return_code |= stack_push(stk_ptr, command_name(pop_number_1));
-
-	CHECK_ERROR();				
-
-	return return_code;
+#define DO_IFJMP_COMMAND(bool_function_value) 					\
+{																\
+	return_code |= stack_pop(&(spu_ptr->stk));					\
+	print_stack(&(spu_ptr->stk), (spu_ptr->stk).capacity);		\
+																\
+	CHECK_ERROR();												\
+                                                 				\
+	elem_t last = (spu_ptr->stk).last_popped_value; 			\
+												 				\
+	return_code |= stack_pop(&(spu_ptr->stk));			 		\
+	print_stack(&(spu_ptr->stk), (spu_ptr->stk).capacity);	    \
+																\
+	CHECK_ERROR();												\
+																\
+	elem_t penult = ((spu_ptr->stk)).last_popped_value; 		\
+																\
+																\
+	if (bool_function_value)									\
+	{															\
+		return_code |= do_jmp_command(spu_ptr);					\
+	}															\
+	else                                                        \
+	{															\
+		(spu_ptr->ip)++;										\
+	}															\
 }
-*/
+
 
 static unsigned int do_jmp_command(struct Processor* spu_ptr)
 {
@@ -230,7 +242,7 @@ static unsigned int do_jmp_command(struct Processor* spu_ptr)
 }
 
 
-static bool is_below(const elem_t penult, const elem_t last)
+/*static bool is_below(const elem_t penult, const elem_t last)
 {
 	return penult < last;
 }
@@ -258,9 +270,9 @@ static bool is_equal(const elem_t penult, const elem_t last)
 static bool is_not_equal(const elem_t penult, const elem_t last)
 {
 	return (ssize_t)penult != (ssize_t)last;
-}
+}*/
 
-
+/*
 static unsigned int do_ifjmp_command(struct Processor* spu_ptr, bool(*if_function)(const elem_t penult, const elem_t last))
 {
 	unsigned int return_code = NO_ERROR;
@@ -289,7 +301,7 @@ static unsigned int do_ifjmp_command(struct Processor* spu_ptr, bool(*if_functio
 	}
 
 	return return_code;
-}
+}*/
 
 
 static unsigned int do_call_command(struct Processor* spu_ptr)
@@ -349,7 +361,7 @@ static unsigned int run_processor(struct Processor* spu_ptr)
 	{
 		return_code |= do_command(spu_ptr);
 
-		processor_print(spu_ptr, spu_ptr->stk.capacity, 1, 3, 3);
+		processor_print(spu_ptr, spu_ptr->stk.capacity, 4, 10000, 5);
 	}
 
 	return return_code;

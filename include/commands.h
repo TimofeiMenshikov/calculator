@@ -16,15 +16,21 @@
 #define DEF_BIN_CMD(cmd_name, number)											\
 DEF_CMD(cmd_name, number, NO_ARGS, 												\
 {																				\
-	do_bin_command(DO_##cmd_name##_COMMAND(last, penult));						\
+	do_bin_command(DO_##cmd_name##_COMMAND(penult, last));						\
 })																				\
-
 
 
 #define DEF_UNARY_CMD(cmd_name, number)											\
 DEF_CMD(cmd_name, number, NO_ARGS, 												\
 {																				\
 	do_unary_command(DO_##cmd_name##_COMMAND(last));							\
+})																				\
+
+
+#define DEF_IFJMP_CMD(cmd_name, number)											\
+DEF_CMD(cmd_name, number, NUM_OR_LABEL_ARG,										\
+{																				\
+	DO_IFJMP_COMMAND(cmd_name##_FUNC(penult, last));							\
 })																				\
 
 
@@ -43,43 +49,17 @@ DEF_BIN_CMD(SUB, -2)
 DEF_BIN_CMD(MUL, 3)
 DEF_BIN_CMD(DIV, -3)
 
-/*DEF_CMD(ADD,   2, NO_ARGS,
-{
-	return_code |= do_bin_command(&(spu_ptr->stk), do_add_command (last, penult) );	
-})
-DEF_CMD(SUB,  -2, NO_ARGS, 
-{
-	return_code |= do_bin_command(&(spu_ptr->stk), do_sub_command);		
-})
-DEF_CMD(MUL,   3, NO_ARGS,
-{
-	return_code |= do_bin_command(&(spu_ptr->stk), do_mul_command);
-}) 
-DEF_CMD(DIV,  -3, NO_ARGS,
-{
-	return_code |= do_bin_command(&(spu_ptr->stk), do_div_command);
-})*/
-
-
 DEF_UNARY_CMD(SQRT, -4)
 DEF_UNARY_CMD(SIN, 5)
 DEF_UNARY_CMD(COS, -5)
 
-/*
-DEF_CMD(SQRT, -4, NO_ARGS,
-{
-	return_code |= do_unary_command(&(spu_ptr->stk), do_sqrt_command);
-})
-DEF_CMD(SIN,   5, NO_ARGS,
-{
-	return_code |= do_unary_command(&(spu_ptr->stk), do_cos_command);		
-})
-DEF_CMD(COS,  -5, NO_ARGS,
-{
-	return_code |= do_unary_command(&(spu_ptr->stk), do_sin_command);	
-})
+DEF_IFJMP_CMD(JBE, 12)
+DEF_IFJMP_CMD(JB, 11)
+DEF_IFJMP_CMD(JAE, 14)
+DEF_IFJMP_CMD(JA, 13)
+DEF_IFJMP_CMD(JE, 15)
+DEF_IFJMP_CMD(JNE, 16)
 
-*/
 
 DEF_CMD(OUT,  6, NO_ARGS,  
 {
@@ -102,30 +82,32 @@ DEF_CMD(JMP, 10, NUM_OR_LABEL_ARG,
 {
 	return_code |= do_jmp_command(spu_ptr);	
 })
+/*
 DEF_CMD(JBE, 12, NUM_OR_LABEL_ARG,
 {
-	return_code |= do_ifjmp_command(spu_ptr, is_below_or_equal);
+	DO_IFJMP_COMMAND(JBE_FUNC(penult, last));							
 })
 DEF_CMD(JB, 11, NUM_OR_LABEL_ARG,
 {
-	return_code |= do_ifjmp_command(spu_ptr, is_below);
+	DO_IFJMP_COMMAND(JB_FUNC(penult, last));
 })
 DEF_CMD(JAE, 14, NUM_OR_LABEL_ARG,
 {
-	return_code |= do_ifjmp_command(spu_ptr, is_above_or_equal);
+	DO_IFJMP_COMMAND(JAE_FUNC(penult, last));
 })
 DEF_CMD(JA, 13, NUM_OR_LABEL_ARG,
 {
-	return_code |= do_ifjmp_command(spu_ptr, is_above);
+	DO_IFJMP_COMMAND(JA_FUNC(penult, last));
 })
 DEF_CMD(JE, 15, NUM_OR_LABEL_ARG,
 {
-	return_code |= do_ifjmp_command(spu_ptr, is_equal);
+	DO_IFJMP_COMMAND(JE_FUNC(penult, last));
 })
 DEF_CMD(JNE, 16, NUM_OR_LABEL_ARG,
 {
-	return_code |= do_ifjmp_command(spu_ptr, is_not_equal);
+	DO_IFJMP_COMMAND(JNE_FUNC(penult, last));
 })
+*/
 DEF_CMD(RAM_PUSH, -6, NUM_ARG, 
 {
 	return_code |= do_ram_push_command(spu_ptr, spu_ptr->code[spu_ptr->ip]);
