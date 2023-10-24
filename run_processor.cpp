@@ -150,26 +150,6 @@ static unsigned int do_draw_ram_command(const elem_t* const ram, const ssize_t n
 }
 
 
-/*static elem_t do_ADD_command(const elem_t a, const elem_t b)
-{
-	return a + b;
-}
-
-static elem_t do_SUB_command(const elem_t a, const elem_t b)
-{
-	return a - b;
-}
-
-static elem_t do_MUL_command(const elem_t a, const elem_t b)
-{
-	return a * b;
-}
-
-static elem_t do_DIV_command(const elem_t a, const elem_t b)
-{
-	return a / b;
-}*/
-
 
 #define DO_ADD_COMMAND(penult, last) penult + last
 #define DO_SUB_COMMAND(penult, last) penult - last
@@ -198,39 +178,28 @@ static elem_t do_DIV_command(const elem_t a, const elem_t b)
 	CHECK_ERROR();												\
 }
 
-/*
-#define do_unary_command(function_value)						\
+#define DO_COS_COMMAND(last) cos(last)
+#define DO_SIN_COMMAND(last) sin(last)
+#define DO_SQRT_COMMAND(last) sqrt(last)
+
+#define do_unary_command(function_value) 						\
+{																\
 	return_code |= stack_pop(&(spu_ptr->stk));					\
 	print_stack(&(spu_ptr->stk), (spu_ptr->stk).capacity);		\
 																\
 	CHECK_ERROR();												\
                                                  				\
 	elem_t last = (spu_ptr->stk).last_popped_value; 			\
-												 				\
+																\
+																\
 	return_code |= stack_push(&(spu_ptr->stk), function_value);	\
 																\
 	CHECK_ERROR();												\
-}	*/												
-
-
-static elem_t do_cos_command(const elem_t a)
-{
-	return cos(a);
-}
-
-static elem_t do_sin_command(const elem_t a)
-{
-	return sin(a);
 }
 
 
-static elem_t do_sqrt_command(const elem_t a)
-{
-	return sqrt(a);
-}
 
-
-static unsigned int do_unary_command(struct Stack* stk_ptr, elem_t (*command_name)(const elem_t a))
+/*static unsigned int do_unary_command(struct Stack* stk_ptr, elem_t (*command_name)(const elem_t a))
 {
 	unsigned int return_code = NO_ERROR;
 
@@ -249,7 +218,7 @@ static unsigned int do_unary_command(struct Stack* stk_ptr, elem_t (*command_nam
 
 	return return_code;
 }
-
+*/
 
 static unsigned int do_jmp_command(struct Processor* spu_ptr)
 {

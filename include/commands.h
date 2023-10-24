@@ -13,11 +13,19 @@
 )*/
 
 
-#define DEF_BIN_CMD(cmd_name, number, arg_type)									\
+#define DEF_BIN_CMD(cmd_name, number)											\
 DEF_CMD(cmd_name, number, NO_ARGS, 												\
 {																				\
 	do_bin_command(DO_##cmd_name##_COMMAND(last, penult));						\
-})	
+})																				\
+
+
+
+#define DEF_UNARY_CMD(cmd_name, number)											\
+DEF_CMD(cmd_name, number, NO_ARGS, 												\
+{																				\
+	do_unary_command(DO_##cmd_name##_COMMAND(last));							\
+})																				\
 
 
 DEF_CMD(PUSH,  1, NUM_ARG,
@@ -30,10 +38,10 @@ DEF_CMD(POP, -1, REG_ARG,
 })
 
 
-DEF_BIN_CMD(ADD, 2, NO_ARGS)
-DEF_BIN_CMD(SUB, -2, NO_ARGS)
-DEF_BIN_CMD(MUL, 3, NO_ARGS)
-DEF_BIN_CMD(DIV, -3, NO_ARGS)
+DEF_BIN_CMD(ADD, 2)
+DEF_BIN_CMD(SUB, -2)
+DEF_BIN_CMD(MUL, 3)
+DEF_BIN_CMD(DIV, -3)
 
 /*DEF_CMD(ADD,   2, NO_ARGS,
 {
@@ -53,9 +61,11 @@ DEF_CMD(DIV,  -3, NO_ARGS,
 })*/
 
 
+DEF_UNARY_CMD(SQRT, -4)
+DEF_UNARY_CMD(SIN, 5)
+DEF_UNARY_CMD(COS, -5)
 
-
-
+/*
 DEF_CMD(SQRT, -4, NO_ARGS,
 {
 	return_code |= do_unary_command(&(spu_ptr->stk), do_sqrt_command);
@@ -68,6 +78,9 @@ DEF_CMD(COS,  -5, NO_ARGS,
 {
 	return_code |= do_unary_command(&(spu_ptr->stk), do_sin_command);	
 })
+
+*/
+
 DEF_CMD(OUT,  6, NO_ARGS,  
 {
 	return_code |= do_out_command(&(spu_ptr->stk)); 	
