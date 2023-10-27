@@ -41,6 +41,7 @@ SUB
 POP RDX 
 RET
 
+
 :const
 PUSH 0
 RPUSH RCX
@@ -48,6 +49,7 @@ JE :zero_a_b_c ;все нулевые коэффициенты бесконеч�
 PUSH -228
 OUT
 HLT
+
 
 :zero_a_b_c
 PUSH 228

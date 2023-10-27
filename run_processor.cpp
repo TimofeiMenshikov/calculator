@@ -150,11 +150,6 @@ static unsigned int do_draw_ram_command(const elem_t* const ram, const ssize_t n
 }
 
 
-#define DO_ADD_COMMAND(penult, last) penult + last
-#define DO_SUB_COMMAND(penult, last) penult - last
-#define DO_MUL_COMMAND(penult, last) penult * last
-#define DO_DIV_COMMAND(penult, last) penult / last
-
 
 #define do_bin_command(function_value) 							\
 {																\
@@ -177,9 +172,7 @@ static unsigned int do_draw_ram_command(const elem_t* const ram, const ssize_t n
 	CHECK_ERROR();												\
 }
 
-#define DO_COS_COMMAND(last) cos(last)
-#define DO_SIN_COMMAND(last) sin(last)
-#define DO_SQRT_COMMAND(last) sqrt(last)
+
 
 #define do_unary_command(function_value) 						\
 {																\
@@ -196,12 +189,7 @@ static unsigned int do_draw_ram_command(const elem_t* const ram, const ssize_t n
 	CHECK_ERROR();												\
 }
 
-#define JA_FUNC(penult, last) 	penult >  last
-#define JAE_FUNC(penult, last) 	penult >= last
-#define JB_FUNC(penult, last)  	penult <  last
-#define JBE_FUNC(penult, last)  penult <= last
-#define JE_FUNC(penult, last)	penult == last
-#define JNE_FUNC(penult, last)  penult != last
+
 
 #define DO_IFJMP_COMMAND(bool_function_value) 					\
 {																\
@@ -276,13 +264,26 @@ static unsigned int do_command(struct Processor* spu_ptr)
 
 	#warning read arg here
 
-	#warning replace to switchcase
 	///////////////////////////////////////////////////////////////////////////////////
 	#define DEF_CMD(cmd_name, number, arg_type, spu_func) 								\
-		if (command == cmd_name) spu_func												\
+		case cmd_name:																	\
+		{																				\
+			spu_func																	\
+			break;																		\
+		}																				\
 
-	#include "include/commands.h"
 
+	switch (command)
+	{
+		#include "include/commands.h"
+
+		default:
+		{
+			fprintf(stderr, "can't do invalid command\n");
+		}
+	}
+
+	
 	#undef DEF_CMD
 	//////////////////////////////////////////////////////////////////////////////////
 

@@ -21,6 +21,15 @@
 		RAM_REG_ARG = 16
 	};
 
+	enum arg_bytes
+	{
+		NUM_ARGUMENT 		  = 1 << 5,
+		REG_ARGUMENT 		  = 1 << 6,
+		NUM_OR_LABEL_ARGUMENT = 1 << 7,
+		RAM_ARGUMENT 		  = 1 << 8
+	};
+
+
 	enum asm_codes
 	{
 		#include "commands.h"

@@ -68,7 +68,6 @@ static size_t print_command_bytecode(const char*  string, const ssize_t n_string
 	}
 	else
 	{
-		#warning move this to new function
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		#define PRINT_CMD_WITH_NUM_ARG(cmd_name, number)															\
 																													\
@@ -119,7 +118,7 @@ static size_t print_command_bytecode(const char*  string, const ssize_t n_string
 					(*code_ip_ptr)++;																					\
 
 
-
+		/////////////////////////////////////////////////////////////////
 		#define PRINT_CMD_WITH_ARG(cmd_name, number, arg_type)			\
 			switch (arg_type)											\
 			{															\
@@ -146,26 +145,31 @@ static size_t print_command_bytecode(const char*  string, const ssize_t n_string
 				case RAM_REG_ARG:										\
 				{														\
 					PRINT_CMD_WITH_REG_ARG(cmd_name, number);			\
+					break;												\
+				}														\
+				case NO_ARGS:											\
+				{														\
+					break;												\
 				}														\
 				default: 												\
 				{														\
 					fprintf(stderr, "invalid argument type\n");			\
 				}														\
 			}
-
+		/////////////////////////////////////////////////////////////////
 
 		///////////////////////////////////////////////////////////////////////////////////
-		#define DEF_CMD(cmd_name, number, arg_type, spu_func)															\
-			if (IS_COMMAND(#cmd_name)) 																					\
-			{																											\
-				code_arr[*code_ip_ptr] = number;																		\
-																														\
-				(*code_ip_ptr)++;																						\
-				argument_type = arg_type;    																			\
-																														\
-                PRINT_CMD_WITH_ARG(cmd_name, number, arg_type)															\
-			}																											\
-			else   // для следюющего if   																				\
+		#define DEF_CMD(cmd_name, number, arg_type, spu_func)								\
+			if (IS_COMMAND(#cmd_name)) 														\
+			{																				\
+				code_arr[*code_ip_ptr] = number;											\
+																							\
+				(*code_ip_ptr)++;															\
+				argument_type = arg_type;    												\
+																							\
+                PRINT_CMD_WITH_ARG(cmd_name, number, arg_type)								\
+			}																				\
+			else   // для следюющего if   													\
 
 		#include "include/commands.h"
 
@@ -212,6 +216,8 @@ static unsigned int print_labels(const struct Labels* const labels_ptr)
 ssize_t assembler(const char* const *  const text, const ssize_t n_strings, elem_t* code_arr)
 {
 	struct Labels labels;
+
+	//char* labels_buffer[LABELS_SIZE * LABEL_NAME_SIZE] = {};
 
 	#warning one calloc should be
 	for (ssize_t n_label = 0; n_label < LABELS_SIZE; n_label++)
